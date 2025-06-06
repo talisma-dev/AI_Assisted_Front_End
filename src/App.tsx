@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProvider } from "./contexts/AppContext";
+import AnimatedBackground from "./components/AnimatedBackground";
 import Login from "./pages/Login";
 import ModuleLanding from "./pages/ModuleLanding";
 import Assessment from "./pages/Assessment";
@@ -23,7 +24,8 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+          <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 relative w-full">
+            <AnimatedBackground />
             <Routes>
               <Route path="/" element={<Login />} />
               <Route path="/module" element={

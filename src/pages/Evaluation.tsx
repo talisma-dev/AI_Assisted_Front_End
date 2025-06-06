@@ -1,21 +1,40 @@
 
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { useApp } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, BookOpen, CheckCircle, AlertTriangle, XCircle, Trophy, Target, TrendingUp, Award } from "lucide-react";
+import EnhancedLogout from "@/components/EnhancedLogout";
+import AnimatedScore from "@/components/AnimatedScore";
+import RubricFilterTabs from "@/components/RubricFilterTabs";
+import { ArrowLeft, BookOpen, CheckCircle, AlertTriangle, XCircle, Trophy, Target, TrendingUp, Award, Brain, Sparkles, Clock, BarChart } from "lucide-react";
 
 const Evaluation = () => {
   const { state, setShowCongratulations } = useApp();
   const navigate = useNavigate();
+  const [activeFilter, setActiveFilter] = useState<'all' | 'mastery' | 'remediation' | 'intervention'>('all');
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [showMotivation, setShowMotivation] = useState(true);
 
   const masteryAchieved = state.conceptScores.filter(cs => cs.status === 'mastery');
   const remediationRequired = state.conceptScores.filter(cs => cs.status === 'remediation');
   const needsIntervention = state.conceptScores.filter(cs => cs.status === 'intervention');
 
   const allMastered = masteryAchieved.length === state.conceptScores.length;
+
+  const filteredConcepts = state.conceptScores.filter(concept => {
+    if (activeFilter === 'all') return true;
+    return concept.status === activeFilter;
+  });
+
+  const filterCounts = {
+    all: state.conceptScores.length,
+    mastery: masteryAchieved.length,
+    remediation: remediationRequired.length,
+    intervention: needsIntervention.length
+  };
 
   const handleNextModule = () => {
     setShowCongratulations(true);
@@ -64,240 +83,355 @@ const Evaluation = () => {
     }
   };
 
-  const ConceptCard = ({ concept, index }: { concept: any; index: number }) => (
-    <Card 
-      className={`bg-gradient-to-r ${getStatusColor(concept.status)} border shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2 animate-fade-in`}
-      style={{ animationDelay: `${index * 0.1}s` }}
-    >
-      <CardHeader className="pb-3 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-white/50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
-        <div className="relative flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/80 rounded-lg shadow-sm">
-              {getStatusIcon(concept.status)}
-            </div>
-            <div>
-              <CardTitle className="text-lg font-semibold bg-gradient-to-r from-gray-700 to-gray-900 bg-clip-text text-transparent">
-                {concept.concept}
-              </CardTitle>
-              <Badge variant={concept.status === 'mastery' ? 'default' : 'secondary'} className="mt-1">
-                {concept.label}
-              </Badge>
-            </div>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {/* Enhanced Progress Circle */}
-          <div className="flex items-center justify-between">
-            <div className="relative w-20 h-20">
-              <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 36 36">
-                <path
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="text-gray-200"
-                />
-                <path
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeDasharray={`${concept.score}, 100`}
-                  strokeLinecap="round"
-                  className={
-                    concept.status === 'mastery' ? 'text-green-500' :
-                    concept.status === 'remediation' ? 'text-orange-500' : 'text-red-500'
-                  }
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <span className="text-lg font-bold">{concept.score}%</span>
+  const ConceptCard = ({ concept, index }: { concept: any; index: number }) => {
+    const isExpanded = expandedCard === concept.concept;
+    
+    return (
+      <motion.div
+        layout
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ delay: index * 0.1 }}
+      >
+        <Card 
+          className={`bg-gradient-to-r ${getStatusColor(concept.status)} border shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer overflow-hidden relative`}
+          onClick={() => setExpandedCard(isExpanded ? null : concept.concept)}
+        >
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0"
+            animate={{ opacity: isExpanded ? 1 : 0 }}
+            transition={{ duration: 0.3 }}
+          />
+          
+          <CardHeader className="pb-3 relative">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <motion.div 
+                  className="p-2 bg-white/80 rounded-lg shadow-sm"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                >
+                  {getStatusIcon(concept.status)}
+                </motion.div>
+                <div>
+                  <CardTitle className="text-lg font-semibold bg-gradient-to-r from-gray-700 to-gray-900 bg-clip-text text-transparent">
+                    {concept.concept}
+                  </CardTitle>
+                  <Badge variant={concept.status === 'mastery' ? 'default' : 'secondary'} className="mt-1">
+                    {concept.label}
+                  </Badge>
                 </div>
               </div>
-            </div>
-            <div className="text-right space-y-1">
-              <div className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded-full ${
-                  concept.status === 'mastery' ? 'bg-green-500 animate-pulse' :
-                  concept.status === 'remediation' ? 'bg-orange-500' : 'bg-red-500'
-                }`}></div>
-                <span className="text-sm font-medium">{getStatusText(concept.status)}</span>
-              </div>
-              {concept.attempts > 0 && (
-                <div className="text-xs text-muted-foreground flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3" />
-                  {concept.attempts} attempts
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Action Button */}
-          {concept.status === 'remediation' && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="w-full bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200 hover:from-orange-100 hover:to-yellow-100 transition-all duration-200 hover:scale-105"
-              onClick={() => handleLearnMore(concept.concept)}
-            >
-              <BookOpen className="h-4 w-4 mr-2" />
-              Continue Learning
-            </Button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-
-  return (
-    <div className="min-h-screen p-6 bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="max-w-6xl mx-auto">
-        {/* Enhanced Header */}
-        <div className="flex items-center justify-between mb-8 animate-fade-in">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate("/module")}
-            className="flex items-center gap-2 hover:scale-105 transition-all duration-200"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Module
-          </Button>
-          <div className="text-right">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Assessment Results
-            </h1>
-            <p className="text-muted-foreground text-lg">Your Personalized Learning Pathway</p>
-          </div>
-        </div>
-
-        {/* Enhanced Summary */}
-        <Card className="mb-8 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 animate-scale-in">
-          <CardHeader>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg">
-                <Target className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <CardTitle className="text-2xl">Thank you for completing the assessment!</CardTitle>
-                <p className="text-muted-foreground text-lg">
-                  Based on your engagement and performance, we've crafted your Personalized Learning Pathway to support your continued growth and success.
-                </p>
-              </div>
+              <AnimatedScore 
+                score={concept.score} 
+                status={concept.status} 
+                size={60}
+                showCelebration={concept.score > 80}
+              />
             </div>
           </CardHeader>
+          
           <CardContent>
-            <div className="grid grid-cols-3 gap-6 text-center">
-              <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
-                <div className="text-3xl font-bold text-green-600 mb-1">{masteryAchieved.length}</div>
-                <div className="text-sm text-green-700 font-medium">Mastery Achieved</div>
-                <CheckCircle className="h-5 w-5 text-green-500 mx-auto mt-2" />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <div className={`w-3 h-3 rounded-full ${
+                    concept.status === 'mastery' ? 'bg-green-500 animate-pulse' :
+                    concept.status === 'remediation' ? 'bg-orange-500' : 'bg-red-500'
+                  }`}></div>
+                  <span className="font-medium">{getStatusText(concept.status)}</span>
+                </div>
+                {concept.attempts > 0 && (
+                  <div className="text-xs text-muted-foreground flex items-center gap-1">
+                    <TrendingUp className="h-3 w-3" />
+                    {concept.attempts} attempts
+                  </div>
+                )}
               </div>
-              <div className="p-4 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl border border-orange-200">
-                <div className="text-3xl font-bold text-orange-600 mb-1">{remediationRequired.length}</div>
-                <div className="text-sm text-orange-700 font-medium">Remediation Required</div>
-                <AlertTriangle className="h-5 w-5 text-orange-500 mx-auto mt-2" />
-              </div>
-              <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl border border-red-200">
-                <div className="text-3xl font-bold text-red-600 mb-1">{needsIntervention.length}</div>
-                <div className="text-sm text-red-700 font-medium">Needs External Intervention</div>
-                <XCircle className="h-5 w-5 text-red-500 mx-auto mt-2" />
-              </div>
+
+              <AnimatePresence>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="pt-4 border-t border-gray-200 space-y-3">
+                      <div className="bg-white/50 rounded-lg p-3">
+                        <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
+                          <Brain className="h-4 w-4" />
+                          Concept Overview
+                        </h4>
+                        <p className="text-xs text-gray-600">
+                          This concept focuses on understanding and applying key principles in machine learning and data analysis.
+                        </p>
+                      </div>
+                      
+                      {concept.attempts > 0 && (
+                        <div className="bg-white/50 rounded-lg p-3">
+                          <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            Learning Journey
+                          </h4>
+                          <div className="space-y-1">
+                            {Array.from({ length: concept.attempts }, (_, i) => (
+                              <div key={i} className="text-xs flex items-center gap-2">
+                                <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                                Attempt {i + 1} - {i === concept.attempts - 1 ? 'Latest' : 'Previous'}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {concept.status === 'remediation' && (
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200 hover:from-orange-100 hover:to-yellow-100 transition-all duration-200"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleLearnMore(concept.concept);
+                    }}
+                  >
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Continue Learning
+                  </Button>
+                </motion.div>
+              )}
             </div>
           </CardContent>
         </Card>
+      </motion.div>
+    );
+  };
 
-        {/* Mastery Achieved */}
-        {masteryAchieved.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="h-6 w-6 text-green-600" />
-              </div>
-              <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                Mastery Achieved
-              </span>
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {masteryAchieved.map((concept, index) => (
-                <ConceptCard key={concept.concept} concept={concept} index={index} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Remediation Required */}
-        {remediationRequired.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <AlertTriangle className="h-6 w-6 text-orange-600" />
-              </div>
-              <span className="bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text text-transparent">
-                Remediation Required
-              </span>
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {remediationRequired.map((concept, index) => (
-                <ConceptCard key={concept.concept} concept={concept} index={index} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Needs External Intervention */}
-        {needsIntervention.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <XCircle className="h-6 w-6 text-red-600" />
-              </div>
-              <span className="bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
-                Needs External Intervention
-              </span>
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {needsIntervention.map((concept, index) => (
-                <ConceptCard key={concept.concept} concept={concept} index={index} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Enhanced Next Module Button */}
-        {allMastered && (
-          <Card className="bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 border-green-200 shadow-xl hover:shadow-2xl transition-all duration-300 animate-scale-in">
-            <CardContent className="p-8 text-center">
-              <div className="mb-6">
-                <div className="inline-flex p-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full mb-4 animate-bounce shadow-lg">
-                  <Trophy className="h-8 w-8 text-white" />
+  return (
+    <div className="min-h-screen relative z-10">
+      <EnhancedLogout />
+      
+      {/* Motivational AI Tutor Tip */}
+      <AnimatePresence>
+        {showMotivation && (
+          <motion.div
+            initial={{ opacity: 0, y: -100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -100 }}
+            className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 max-w-md"
+          >
+            <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 p-1 rounded-xl">
+              <div className="bg-white rounded-lg p-4 relative">
+                <button
+                  onClick={() => setShowMotivation(false)}
+                  className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+                >
+                  ×
+                </button>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <Sparkles className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-800">AI Learning Assistant</h3>
+                    <p className="text-xs text-gray-600">Your personalized guide</p>
+                  </div>
                 </div>
-                <div className="flex justify-center gap-2 mb-4">
-                  <Award className="h-6 w-6 text-yellow-500 animate-pulse" />
-                  <Award className="h-6 w-6 text-yellow-500 animate-pulse" style={{ animationDelay: '0.2s' }} />
-                  <Award className="h-6 w-6 text-yellow-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
-                </div>
+                <p className="text-sm text-gray-700">
+                  🎉 Great job completing your assessment! Your personalized learning pathway is ready. Focus on areas that need improvement and celebrate your victories!
+                </p>
               </div>
-              <h3 className="text-3xl font-bold text-green-800 mb-3 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                Outstanding Achievement! 🎉
-              </h3>
-              <p className="text-green-700 mb-6 text-lg">
-                You've mastered all concepts in this module with exceptional performance. You're ready to advance to the next level of your learning journey!
-              </p>
-              <Button 
-                onClick={handleNextModule}
-                size="lg"
-                className="h-14 px-12 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                <Trophy className="h-6 w-6 mr-3" />
-                ADVANCE TO NEXT MODULE
-              </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </motion.div>
         )}
+      </AnimatePresence>
+
+      <div className="p-6">
+        <div className="max-w-6xl mx-auto">
+          {/* Enhanced Header */}
+          <motion.div 
+            className="flex items-center justify-between mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate("/module")}
+              className="flex items-center gap-2 hover:scale-105 transition-all duration-200"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Module
+            </Button>
+            <div className="text-right">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Assessment Results
+              </h1>
+              <p className="text-muted-foreground text-lg">Your Personalized Learning Pathway</p>
+            </div>
+          </motion.div>
+
+          {/* Enhanced Summary */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Card className="mb-8 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
+              <CardHeader>
+                <div className="flex items-center gap-3 mb-2">
+                  <motion.div 
+                    className="p-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg"
+                    animate={{ rotate: [0, 5, -5, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                  >
+                    <Target className="h-6 w-6 text-white" />
+                  </motion.div>
+                  <div>
+                    <CardTitle className="text-2xl">Thank you for completing the assessment!</CardTitle>
+                    <p className="text-muted-foreground text-lg">
+                      Based on your engagement and performance, we've crafted your Personalized Learning Pathway to support your continued growth and success.
+                    </p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                  <motion.div 
+                    className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <motion.div 
+                      className="text-3xl font-bold text-green-600 mb-1"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.5, type: "spring" }}
+                    >
+                      {masteryAchieved.length}
+                    </motion.div>
+                    <div className="text-sm text-green-700 font-medium">Mastery Achieved</div>
+                    <CheckCircle className="h-5 w-5 text-green-500 mx-auto mt-2" />
+                  </motion.div>
+                  <motion.div 
+                    className="p-4 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl border border-orange-200"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <motion.div 
+                      className="text-3xl font-bold text-orange-600 mb-1"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.7, type: "spring" }}
+                    >
+                      {remediationRequired.length}
+                    </motion.div>
+                    <div className="text-sm text-orange-700 font-medium">Remediation Required</div>
+                    <AlertTriangle className="h-5 w-5 text-orange-500 mx-auto mt-2" />
+                  </motion.div>
+                  <motion.div 
+                    className="p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl border border-red-200"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <motion.div 
+                      className="text-3xl font-bold text-red-600 mb-1"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.9, type: "spring" }}
+                    >
+                      {needsIntervention.length}
+                    </motion.div>
+                    <div className="text-sm text-red-700 font-medium">Needs External Intervention</div>
+                    <XCircle className="h-5 w-5 text-red-500 mx-auto mt-2" />
+                  </motion.div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Filter Tabs */}
+          <RubricFilterTabs
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+            counts={filterCounts}
+          />
+
+          {/* Filtered Concepts */}
+          <motion.div layout className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <AnimatePresence mode="popLayout">
+              {filteredConcepts.map((concept, index) => (
+                <ConceptCard key={concept.concept} concept={concept} index={index} />
+              ))}
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Enhanced Next Module Button */}
+          {allMastered && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1 }}
+            >
+              <Card className="bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 border-green-200 shadow-xl hover:shadow-2xl transition-all duration-300">
+                <CardContent className="p-8 text-center">
+                  <div className="mb-6">
+                    <motion.div 
+                      className="inline-flex p-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full mb-4 shadow-lg"
+                      animate={{ 
+                        rotate: [0, 10, -10, 0],
+                        scale: [1, 1.1, 1]
+                      }}
+                      transition={{ 
+                        duration: 2, 
+                        repeat: Infinity, 
+                        repeatDelay: 1 
+                      }}
+                    >
+                      <Trophy className="h-8 w-8 text-white" />
+                    </motion.div>
+                    <div className="flex justify-center gap-2 mb-4">
+                      {[0, 1, 2].map((i) => (
+                        <motion.div
+                          key={i}
+                          animate={{ 
+                            scale: [1, 1.2, 1],
+                            opacity: [0.5, 1, 0.5]
+                          }}
+                          transition={{ 
+                            duration: 1.5, 
+                            repeat: Infinity,
+                            delay: i * 0.2
+                          }}
+                        >
+                          <Award className="h-6 w-6 text-yellow-500" />
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                  <h3 className="text-3xl font-bold text-green-800 mb-3 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                    Outstanding Achievement! 🎉
+                  </h3>
+                  <p className="text-green-700 mb-6 text-lg">
+                    You've mastered all concepts in this module with exceptional performance. You're ready to advance to the next level of your learning journey!
+                  </p>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button 
+                      onClick={handleNextModule}
+                      size="lg"
+                      className="h-14 px-12 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl"
+                    >
+                      <Trophy className="h-6 w-6 mr-3" />
+                      ADVANCE TO NEXT MODULE
+                    </Button>
+                  </motion.div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </div>
       </div>
     </div>
   );
