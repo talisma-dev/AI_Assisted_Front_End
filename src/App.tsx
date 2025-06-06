@@ -1,25 +1,60 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+import { AppProvider } from "./contexts/AppContext";
+import Login from "./pages/Login";
+import ModuleLanding from "./pages/ModuleLanding";
+import Assessment from "./pages/Assessment";
+import Evaluation from "./pages/Evaluation";
+import Learning from "./pages/Learning";
+import ProtectedRoute from "./components/ProtectedRoute";
+import CongratulationsModal from "./components/CongratulationsModal";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AppProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+            <Routes>
+              <Route path="/" element={<Login />} />
+              <Route path="/module" element={
+                <ProtectedRoute>
+                  <ModuleLanding />
+                </ProtectedRoute>
+              } />
+              <Route path="/assessment" element={
+                <ProtectedRoute>
+                  <Assessment />
+                </ProtectedRoute>
+              } />
+              <Route path="/assessment/:concept" element={
+                <ProtectedRoute>
+                  <Assessment />
+                </ProtectedRoute>
+              } />
+              <Route path="/evaluation" element={
+                <ProtectedRoute>
+                  <Evaluation />
+                </ProtectedRoute>
+              } />
+              <Route path="/learning/:concept" element={
+                <ProtectedRoute>
+                  <Learning />
+                </ProtectedRoute>
+              } />
+            </Routes>
+            <CongratulationsModal />
+          </div>
+        </BrowserRouter>
+      </AppProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
