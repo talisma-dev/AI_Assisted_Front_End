@@ -10,6 +10,7 @@ import ModuleLanding from "./pages/ModuleLanding";
 import Assessment from "./pages/Assessment";
 import Evaluation from "./pages/Evaluation";
 import Learning from "./pages/Learning";
+import LearningResource from "./components/LearningResource";
 import ProtectedRoute from "./components/ProtectedRoute";
 import CongratulationsModal from "./components/CongratulationsModal";
 
@@ -48,6 +49,11 @@ const App = () => (
               <Route path="/learning/:concept" element={
                 <ProtectedRoute>
                   <Learning />
+                </ProtectedRoute>
+              } />
+              <Route path="/learning/:concept/resource/:resourceId" element={
+                <ProtectedRoute>
+                  <LearningResource />
                 </ProtectedRoute>
               } />
             </Routes>

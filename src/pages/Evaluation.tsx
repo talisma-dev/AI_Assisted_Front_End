@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, BookOpen, CheckCircle, AlertTriangle, XCircle, Trophy } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle, AlertTriangle, XCircle, Trophy, Target, TrendingUp, Award } from "lucide-react";
 
 const Evaluation = () => {
   const { state, setShowCongratulations } = useApp();
@@ -41,11 +41,11 @@ const Evaluation = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'mastery':
-        return 'from-green-50 to-emerald-50 border-green-200';
+        return 'from-green-50 via-emerald-50 to-green-50 border-green-200 shadow-green-100';
       case 'remediation':
-        return 'from-orange-50 to-yellow-50 border-orange-200';
+        return 'from-orange-50 via-yellow-50 to-orange-50 border-orange-200 shadow-orange-100';
       case 'intervention':
-        return 'from-red-50 to-pink-50 border-red-200';
+        return 'from-red-50 via-pink-50 to-red-50 border-red-200 shadow-red-100';
       default:
         return 'from-gray-50 to-slate-50 border-gray-200';
     }
@@ -54,9 +54,9 @@ const Evaluation = () => {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'mastery':
-        return 'Completed';
+        return 'Mastered';
       case 'remediation':
-        return 'Needs Remediation';
+        return 'Needs Review';
       case 'intervention':
         return 'Contact Advisor';
       default:
@@ -64,25 +64,35 @@ const Evaluation = () => {
     }
   };
 
-  const ConceptCard = ({ concept }: { concept: any }) => (
-    <Card className={`bg-gradient-to-r ${getStatusColor(concept.status)} border shadow-lg hover:shadow-xl transition-all duration-200`}>
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2">
-            {getStatusIcon(concept.status)}
-            <CardTitle className="text-lg font-semibold">{concept.concept}</CardTitle>
+  const ConceptCard = ({ concept, index }: { concept: any; index: number }) => (
+    <Card 
+      className={`bg-gradient-to-r ${getStatusColor(concept.status)} border shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2 animate-fade-in`}
+      style={{ animationDelay: `${index * 0.1}s` }}
+    >
+      <CardHeader className="pb-3 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-white/50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+        <div className="relative flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-white/80 rounded-lg shadow-sm">
+              {getStatusIcon(concept.status)}
+            </div>
+            <div>
+              <CardTitle className="text-lg font-semibold bg-gradient-to-r from-gray-700 to-gray-900 bg-clip-text text-transparent">
+                {concept.concept}
+              </CardTitle>
+              <Badge variant={concept.status === 'mastery' ? 'default' : 'secondary'} className="mt-1">
+                {concept.label}
+              </Badge>
+            </div>
           </div>
-          <Badge variant={concept.status === 'mastery' ? 'default' : 'secondary'}>
-            {concept.label}
-          </Badge>
         </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {/* Progress Circle */}
+          {/* Enhanced Progress Circle */}
           <div className="flex items-center justify-between">
-            <div className="relative w-16 h-16">
-              <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+            <div className="relative w-20 h-20">
+              <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 36 36">
                 <path
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   fill="none"
@@ -94,8 +104,9 @@ const Evaluation = () => {
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2"
+                  strokeWidth="3"
                   strokeDasharray={`${concept.score}, 100`}
+                  strokeLinecap="round"
                   className={
                     concept.status === 'mastery' ? 'text-green-500' :
                     concept.status === 'remediation' ? 'text-orange-500' : 'text-red-500'
@@ -103,14 +114,23 @@ const Evaluation = () => {
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-sm font-bold">{concept.score}%</span>
+                <div className="text-center">
+                  <span className="text-lg font-bold">{concept.score}%</span>
+                </div>
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-sm font-medium">{getStatusText(concept.status)}</div>
+            <div className="text-right space-y-1">
+              <div className="flex items-center gap-2">
+                <div className={`w-3 h-3 rounded-full ${
+                  concept.status === 'mastery' ? 'bg-green-500 animate-pulse' :
+                  concept.status === 'remediation' ? 'bg-orange-500' : 'bg-red-500'
+                }`}></div>
+                <span className="text-sm font-medium">{getStatusText(concept.status)}</span>
+              </div>
               {concept.attempts > 0 && (
-                <div className="text-xs text-muted-foreground">
-                  Attempts: {concept.attempts}
+                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                  <TrendingUp className="h-3 w-3" />
+                  {concept.attempts} attempts
                 </div>
               )}
             </div>
@@ -121,11 +141,11 @@ const Evaluation = () => {
             <Button 
               variant="outline" 
               size="sm" 
-              className="w-full"
+              className="w-full bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200 hover:from-orange-100 hover:to-yellow-100 transition-all duration-200 hover:scale-105"
               onClick={() => handleLearnMore(concept.concept)}
             >
               <BookOpen className="h-4 w-4 mr-2" />
-              Learn More
+              Continue Learning
             </Button>
           )}
         </div>
@@ -134,45 +154,57 @@ const Evaluation = () => {
   );
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-6 bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        {/* Enhanced Header */}
+        <div className="flex items-center justify-between mb-8 animate-fade-in">
           <Button 
             variant="ghost" 
             onClick={() => navigate("/module")}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 hover:scale-105 transition-all duration-200"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Module
           </Button>
           <div className="text-right">
-            <h1 className="text-2xl font-bold">Assessment Results</h1>
-            <p className="text-muted-foreground">Your Personalized Learning Pathway</p>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Assessment Results
+            </h1>
+            <p className="text-muted-foreground text-lg">Your Personalized Learning Pathway</p>
           </div>
         </div>
 
-        {/* Summary */}
-        <Card className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50">
+        {/* Enhanced Summary */}
+        <Card className="mb-8 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 animate-scale-in">
           <CardHeader>
-            <CardTitle>Thank you for completing the assessment!</CardTitle>
-            <p className="text-muted-foreground">
-              Based on your engagement and performance, we've crafted your Personalized Learning Pathway to support your continued growth and success.
-            </p>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg">
+                <Target className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-2xl">Thank you for completing the assessment!</CardTitle>
+                <p className="text-muted-foreground text-lg">
+                  Based on your engagement and performance, we've crafted your Personalized Learning Pathway to support your continued growth and success.
+                </p>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold text-green-600">{masteryAchieved.length}</div>
-                <div className="text-sm text-muted-foreground">Mastery Achieved</div>
+            <div className="grid grid-cols-3 gap-6 text-center">
+              <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
+                <div className="text-3xl font-bold text-green-600 mb-1">{masteryAchieved.length}</div>
+                <div className="text-sm text-green-700 font-medium">Mastery Achieved</div>
+                <CheckCircle className="h-5 w-5 text-green-500 mx-auto mt-2" />
               </div>
-              <div>
-                <div className="text-2xl font-bold text-orange-600">{remediationRequired.length}</div>
-                <div className="text-sm text-muted-foreground">Remediation Required</div>
+              <div className="p-4 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl border border-orange-200">
+                <div className="text-3xl font-bold text-orange-600 mb-1">{remediationRequired.length}</div>
+                <div className="text-sm text-orange-700 font-medium">Remediation Required</div>
+                <AlertTriangle className="h-5 w-5 text-orange-500 mx-auto mt-2" />
               </div>
-              <div>
-                <div className="text-2xl font-bold text-red-600">{needsIntervention.length}</div>
-                <div className="text-sm text-muted-foreground">Needs External Intervention</div>
+              <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl border border-red-200">
+                <div className="text-3xl font-bold text-red-600 mb-1">{needsIntervention.length}</div>
+                <div className="text-sm text-red-700 font-medium">Needs External Intervention</div>
+                <XCircle className="h-5 w-5 text-red-500 mx-auto mt-2" />
               </div>
             </div>
           </CardContent>
@@ -181,13 +213,17 @@ const Evaluation = () => {
         {/* Mastery Achieved */}
         {masteryAchieved.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              Mastery Achieved
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <CheckCircle className="h-6 w-6 text-green-600" />
+              </div>
+              <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                Mastery Achieved
+              </span>
             </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {masteryAchieved.map((concept) => (
-                <ConceptCard key={concept.concept} concept={concept} />
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {masteryAchieved.map((concept, index) => (
+                <ConceptCard key={concept.concept} concept={concept} index={index} />
               ))}
             </div>
           </div>
@@ -196,13 +232,17 @@ const Evaluation = () => {
         {/* Remediation Required */}
         {remediationRequired.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-orange-600" />
-              Remediation Required
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <AlertTriangle className="h-6 w-6 text-orange-600" />
+              </div>
+              <span className="bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text text-transparent">
+                Remediation Required
+              </span>
             </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {remediationRequired.map((concept) => (
-                <ConceptCard key={concept.concept} concept={concept} />
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {remediationRequired.map((concept, index) => (
+                <ConceptCard key={concept.concept} concept={concept} index={index} />
               ))}
             </div>
           </div>
@@ -211,36 +251,49 @@ const Evaluation = () => {
         {/* Needs External Intervention */}
         {needsIntervention.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <XCircle className="h-5 w-5 text-red-600" />
-              Needs External Intervention
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+              <div className="p-2 bg-red-100 rounded-lg">
+                <XCircle className="h-6 w-6 text-red-600" />
+              </div>
+              <span className="bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
+                Needs External Intervention
+              </span>
             </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {needsIntervention.map((concept) => (
-                <ConceptCard key={concept.concept} concept={concept} />
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {needsIntervention.map((concept, index) => (
+                <ConceptCard key={concept.concept} concept={concept} index={index} />
               ))}
             </div>
           </div>
         )}
 
-        {/* Next Module Button */}
+        {/* Enhanced Next Module Button */}
         {allMastered && (
-          <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
-            <CardContent className="p-6 text-center">
-              <Trophy className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-green-800 mb-2">
-                Congratulations! 🎉
+          <Card className="bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 border-green-200 shadow-xl hover:shadow-2xl transition-all duration-300 animate-scale-in">
+            <CardContent className="p-8 text-center">
+              <div className="mb-6">
+                <div className="inline-flex p-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full mb-4 animate-bounce shadow-lg">
+                  <Trophy className="h-8 w-8 text-white" />
+                </div>
+                <div className="flex justify-center gap-2 mb-4">
+                  <Award className="h-6 w-6 text-yellow-500 animate-pulse" />
+                  <Award className="h-6 w-6 text-yellow-500 animate-pulse" style={{ animationDelay: '0.2s' }} />
+                  <Award className="h-6 w-6 text-yellow-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
+                </div>
+              </div>
+              <h3 className="text-3xl font-bold text-green-800 mb-3 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                Outstanding Achievement! 🎉
               </h3>
-              <p className="text-green-700 mb-4">
-                You've mastered all concepts in this module. You're ready to advance to the next level!
+              <p className="text-green-700 mb-6 text-lg">
+                You've mastered all concepts in this module with exceptional performance. You're ready to advance to the next level of your learning journey!
               </p>
               <Button 
                 onClick={handleNextModule}
                 size="lg"
-                className="bg-green-600 hover:bg-green-700"
+                className="h-14 px-12 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
-                <Trophy className="h-5 w-5 mr-2" />
-                Next Module
+                <Trophy className="h-6 w-6 mr-3" />
+                ADVANCE TO NEXT MODULE
               </Button>
             </CardContent>
           </Card>

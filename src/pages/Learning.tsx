@@ -4,7 +4,7 @@ import { useApp } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, BookOpen, Play, Target, Lightbulb, FileText } from "lucide-react";
+import { ArrowLeft, BookOpen, Play, Target, Lightbulb, FileText, Clock, Users, Award } from "lucide-react";
 
 const Learning = () => {
   const { concept } = useParams();
@@ -18,6 +18,12 @@ const Learning = () => {
     navigate(`/assessment/${encodeURIComponent(decodedConcept)}`);
   };
 
+  const handleResourceClick = (resourceId: string, resourceTitle: string) => {
+    navigate(`/learning/${encodeURIComponent(decodedConcept)}/resource/${resourceId}`, {
+      state: { resourceTitle, concept: decodedConcept }
+    });
+  };
+
   const learningContent = {
     "Bayesian Inference": {
       description: "Bayesian inference is a method of statistical inference in which Bayes' theorem is used to update the probability for a hypothesis as more evidence or information becomes available.",
@@ -28,10 +34,10 @@ const Learning = () => {
         "Working with conjugate priors"
       ],
       resources: [
-        "Interactive Bayesian Visualization",
-        "Probability Theory Fundamentals",
-        "Case Studies in Medical Diagnosis",
-        "Computational Bayesian Methods"
+        { id: "bayesian-viz", title: "Interactive Bayesian Visualization", duration: "15 min", type: "Interactive" },
+        { id: "prob-theory", title: "Probability Theory Fundamentals", duration: "25 min", type: "Video" },
+        { id: "medical-case", title: "Case Studies in Medical Diagnosis", duration: "20 min", type: "Case Study" },
+        { id: "computational", title: "Computational Bayesian Methods", duration: "30 min", type: "Tutorial" }
       ]
     },
     "Feature Selection & Dimensionality Reduction": {
@@ -43,10 +49,10 @@ const Learning = () => {
         "Feature importance and selection strategies"
       ],
       resources: [
-        "PCA Step-by-Step Tutorial",
-        "Feature Selection Algorithms",
-        "Dimensionality Reduction Techniques",
-        "Real-world Feature Engineering"
+        { id: "pca-tutorial", title: "PCA Step-by-Step Tutorial", duration: "20 min", type: "Tutorial" },
+        { id: "feature-algorithms", title: "Feature Selection Algorithms", duration: "18 min", type: "Interactive" },
+        { id: "dim-reduction", title: "Dimensionality Reduction Techniques", duration: "22 min", type: "Video" },
+        { id: "feature-engineering", title: "Real-world Feature Engineering", duration: "35 min", type: "Case Study" }
       ]
     },
     "Linear & Non-Linear Models": {
@@ -58,10 +64,10 @@ const Learning = () => {
         "Regularization techniques"
       ],
       resources: [
-        "Linear Algebra Foundations",
-        "Non-linear Model Examples",
-        "Regularization Techniques",
-        "Model Selection Strategies"
+        { id: "linear-algebra", title: "Linear Algebra Foundations", duration: "25 min", type: "Video" },
+        { id: "nonlinear-examples", title: "Non-linear Model Examples", duration: "30 min", type: "Interactive" },
+        { id: "regularization", title: "Regularization Techniques", duration: "20 min", type: "Tutorial" },
+        { id: "model-selection", title: "Model Selection Strategies", duration: "15 min", type: "Guide" }
       ]
     },
     "Gaussian distributions and decision boundaries": {
@@ -73,108 +79,147 @@ const Learning = () => {
         "Gaussian Mixture Models"
       ],
       resources: [
-        "Statistics Review: Normal Distributions",
-        "Classification Decision Boundaries",
-        "Gaussian Mixture Model Tutorial",
-        "Probability Density Functions"
+        { id: "normal-dist", title: "Statistics Review: Normal Distributions", duration: "18 min", type: "Video" },
+        { id: "decision-boundaries", title: "Classification Decision Boundaries", duration: "22 min", type: "Interactive" },
+        { id: "gmm-tutorial", title: "Gaussian Mixture Model Tutorial", duration: "28 min", type: "Tutorial" },
+        { id: "pdf-functions", title: "Probability Density Functions", duration: "16 min", type: "Guide" }
       ]
     }
   };
 
   const content = learningContent[decodedConcept as keyof typeof learningContent] || learningContent["Bayesian Inference"];
 
+  const getResourceIcon = (type: string) => {
+    switch (type) {
+      case "Interactive": return <Play className="h-4 w-4 text-blue-600" />;
+      case "Video": return <Play className="h-4 w-4 text-red-600" />;
+      case "Tutorial": return <BookOpen className="h-4 w-4 text-green-600" />;
+      case "Case Study": return <Users className="h-4 w-4 text-purple-600" />;
+      case "Guide": return <FileText className="h-4 w-4 text-orange-600" />;
+      default: return <FileText className="h-4 w-4 text-gray-600" />;
+    }
+  };
+
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-6 bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        {/* Header with enhanced animations */}
+        <div className="flex items-center justify-between mb-6 animate-fade-in">
           <Button 
             variant="ghost" 
             onClick={() => navigate("/evaluation")}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 hover:scale-105 transition-all duration-200"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Results
           </Button>
-          <Badge variant="secondary" className="text-sm">
+          <Badge variant="secondary" className="text-sm animate-pulse">
             Learning Material
           </Badge>
         </div>
 
-        {/* Concept Header */}
-        <Card className="mb-6 bg-gradient-to-r from-blue-50 to-purple-50">
-          <CardHeader>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <BookOpen className="h-6 w-6 text-primary" />
+        {/* Enhanced Concept Header */}
+        <Card className="mb-6 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 animate-scale-in">
+          <CardHeader className="relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5 animate-pulse"></div>
+            <div className="relative flex items-center gap-3 mb-2">
+              <div className="p-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg animate-bounce">
+                <BookOpen className="h-6 w-6 text-white" />
               </div>
               <div>
-                <CardTitle className="text-2xl">{decodedConcept}</CardTitle>
-                <p className="text-muted-foreground">
-                  Current Score: {conceptData?.score || 0}% • Attempts: {conceptData?.attempts || 0}
-                </p>
+                <CardTitle className="text-2xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  {decodedConcept}
+                </CardTitle>
+                <div className="flex items-center gap-4 text-muted-foreground">
+                  <span>Current Score: {conceptData?.score || 0}%</span>
+                  <span>•</span>
+                  <span>Attempts: {conceptData?.attempts || 0}</span>
+                  <Award className="h-4 w-4 ml-2 text-yellow-500" />
+                </div>
               </div>
             </div>
           </CardHeader>
         </Card>
 
-        {/* Learning Content */}
+        {/* Learning Content with staggered animations */}
         <div className="space-y-6 mb-8">
           {/* Overview */}
-          <Card>
+          <Card className="hover:shadow-xl transition-all duration-300 animate-fade-in border-0 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5 text-blue-600" />
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Target className="h-5 w-5 text-blue-600" />
+                </div>
                 Overview
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed text-lg">
                 {content.description}
               </p>
             </CardContent>
           </Card>
 
-          {/* Key Learning Points */}
-          <Card>
+          {/* Key Learning Points with enhanced styling */}
+          <Card className="hover:shadow-xl transition-all duration-300 animate-fade-in border-0 shadow-lg" style={{ animationDelay: '0.1s' }}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Lightbulb className="h-5 w-5 text-yellow-600" />
+                <div className="p-2 bg-yellow-100 rounded-lg">
+                  <Lightbulb className="h-5 w-5 text-yellow-600" />
+                </div>
                 Key Learning Points
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-3">
+              <ul className="space-y-4">
                 {content.keyPoints.map((point, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center text-sm font-medium text-primary mt-0.5">
+                  <li key={index} className="flex items-start gap-3 p-3 rounded-lg bg-gradient-to-r from-gray-50 to-blue-50 hover:from-blue-50 hover:to-purple-50 transition-all duration-200 hover:scale-[1.02]">
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-lg">
                       {index + 1}
                     </div>
-                    <span className="text-muted-foreground">{point}</span>
+                    <span className="text-muted-foreground font-medium">{point}</span>
                   </li>
                 ))}
               </ul>
             </CardContent>
           </Card>
 
-          {/* Learning Resources */}
-          <Card>
+          {/* Enhanced Learning Resources */}
+          <Card className="hover:shadow-xl transition-all duration-300 animate-fade-in border-0 shadow-lg" style={{ animationDelay: '0.2s' }}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-green-600" />
-                Learning Resources
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <FileText className="h-5 w-5 text-green-600" />
+                </div>
+                Interactive Learning Resources
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid md:grid-cols-2 gap-3">
+              <div className="grid md:grid-cols-2 gap-4">
                 {content.resources.map((resource, index) => (
                   <div 
                     key={index}
-                    className="p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors cursor-pointer"
+                    onClick={() => handleResourceClick(resource.id, resource.title)}
+                    className="group p-4 bg-gradient-to-r from-white to-gray-50 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105 hover:-translate-y-1"
                   >
-                    <div className="flex items-center gap-2">
-                      <Play className="h-4 w-4 text-primary" />
-                      <span className="font-medium">{resource}</span>
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        {getResourceIcon(resource.type)}
+                        <div>
+                          <h4 className="font-semibold text-sm group-hover:text-blue-600 transition-colors">
+                            {resource.title}
+                          </h4>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                            <Clock className="h-3 w-3" />
+                            <span>{resource.duration}</span>
+                            <Badge variant="outline" className="text-xs">{resource.type}</Badge>
+                          </div>
+                        </div>
+                      </div>
+                      <ArrowLeft className="h-4 w-4 text-muted-foreground group-hover:text-blue-600 transform rotate-180 group-hover:translate-x-1 transition-all" />
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-1">
+                      <div className="bg-gradient-to-r from-blue-600 to-purple-600 h-1 rounded-full group-hover:animate-pulse" style={{width: '0%'}}></div>
                     </div>
                   </div>
                 ))}
@@ -183,22 +228,29 @@ const Learning = () => {
           </Card>
         </div>
 
-        {/* Action Section */}
-        <Card className="bg-gradient-to-r from-green-50 to-blue-50">
-          <CardContent className="p-6 text-center">
-            <h3 className="text-xl font-semibold mb-2">Ready to Test Your Knowledge?</h3>
-            <p className="text-muted-foreground mb-4">
+        {/* Enhanced Action Section */}
+        <Card className="bg-gradient-to-r from-green-50 via-blue-50 to-purple-50 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+          <CardContent className="p-8 text-center">
+            <div className="mb-4">
+              <div className="inline-flex p-3 bg-gradient-to-r from-green-600 to-blue-600 rounded-full mb-4 animate-bounce">
+                <Award className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+              Ready to Test Your Knowledge?
+            </h3>
+            <p className="text-muted-foreground mb-6 text-lg">
               Once you've reviewed the material above, take the focused assessment to demonstrate your mastery of {decodedConcept}.
             </p>
             <Button 
               onClick={handleReadyToTest}
               size="lg"
-              className="h-12 px-8"
+              className="h-14 px-12 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
             >
-              <Play className="mr-2 h-5 w-5" />
-              READY TO TEST YOUR KNOWLEDGE
+              <Play className="mr-3 h-6 w-6" />
+              START ASSESSMENT
             </Button>
-            <p className="text-sm text-muted-foreground mt-3">
+            <p className="text-sm text-muted-foreground mt-4 opacity-80">
               This assessment will focus specifically on {decodedConcept} concepts.
             </p>
           </CardContent>
