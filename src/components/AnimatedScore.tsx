@@ -120,7 +120,7 @@ const AnimatedScore: React.FC<AnimatedScoreProps> = ({
             >
               {displayScore}%
             </motion.span>
-          </div>
+          </motion.div>
         </div>
         
         {/* Celebration Animation */}

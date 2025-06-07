@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import EnhancedLogout from "@/components/EnhancedLogout";
 import AnimatedScore from "@/components/AnimatedScore";
 import RubricFilterTabs from "@/components/RubricFilterTabs";
+import FloatingElements from "@/components/FloatingElements";
 import { ArrowLeft, BookOpen, CheckCircle, AlertTriangle, XCircle, Trophy, Target, TrendingUp, Award, Brain, Sparkles, Clock, BarChart } from "lucide-react";
 
 const Evaluation = () => {
@@ -93,6 +94,11 @@ const Evaluation = () => {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
         transition={{ delay: index * 0.1 }}
+        whileHover={{ 
+          scale: 1.02,
+          rotateY: 5,
+          transition: { duration: 0.2 }
+        }}
       >
         <Card 
           className={`bg-gradient-to-r ${getStatusColor(concept.status)} border shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer overflow-hidden relative`}
@@ -110,6 +116,14 @@ const Evaluation = () => {
                 <motion.div 
                   className="p-2 bg-white/80 rounded-lg shadow-sm"
                   whileHover={{ scale: 1.1, rotate: 5 }}
+                  animate={{ 
+                    rotate: [0, 2, -2, 0],
+                  }}
+                  transition={{ 
+                    duration: 3, 
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
                 >
                   {getStatusIcon(concept.status)}
                 </motion.div>
@@ -122,12 +136,23 @@ const Evaluation = () => {
                   </Badge>
                 </div>
               </div>
-              <AnimatedScore 
-                score={concept.score} 
-                status={concept.status} 
-                size={60}
-                showCelebration={concept.score > 80}
-              />
+              <motion.div
+                animate={{
+                  rotateY: [0, 10, -10, 0]
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                <AnimatedScore 
+                  score={concept.score} 
+                  status={concept.status} 
+                  size={60}
+                  showCelebration={concept.score > 80}
+                />
+              </motion.div>
             </div>
           </CardHeader>
           
@@ -215,15 +240,25 @@ const Evaluation = () => {
 
   return (
     <div className="min-h-screen relative z-10">
+      <FloatingElements />
       <EnhancedLogout />
       
       {/* Motivational AI Tutor Tip */}
       <AnimatePresence>
         {showMotivation && (
           <motion.div
-            initial={{ opacity: 0, y: -100 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -100 }}
+            initial={{ opacity: 0, y: -100, rotateX: -90 }}
+            animate={{ 
+              opacity: 1, 
+              y: 0, 
+              rotateX: 0,
+              scale: [1, 1.02, 1]
+            }}
+            exit={{ opacity: 0, y: -100, rotateX: -90 }}
+            transition={{ 
+              duration: 0.8,
+              scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+            }}
             className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 max-w-md"
           >
             <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 p-1 rounded-xl">
@@ -235,9 +270,20 @@ const Evaluation = () => {
                   ×
                 </button>
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                  <motion.div 
+                    className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center"
+                    animate={{ 
+                      rotate: [0, 10, -10, 0],
+                      scale: [1, 1.1, 1]
+                    }}
+                    transition={{ 
+                      duration: 2, 
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  >
                     <Sparkles className="h-5 w-5 text-white" />
-                  </div>
+                  </motion.div>
                   <div>
                     <h3 className="font-semibold text-gray-800">AI Learning Assistant</h3>
                     <p className="text-xs text-gray-600">Your personalized guide</p>
@@ -259,21 +305,34 @@ const Evaluation = () => {
             className="flex items-center justify-between mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            whileHover={{ scale: 1.01 }}
           >
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate("/module")}
-              className="flex items-center gap-2 hover:scale-105 transition-all duration-200"
+            <motion.div whileHover={{ x: -5 }}>
+              <Button 
+                variant="ghost" 
+                onClick={() => navigate("/module")}
+                className="flex items-center gap-2 hover:scale-105 transition-all duration-200"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Module
+              </Button>
+            </motion.div>
+            <motion.div 
+              className="text-right"
+              animate={{
+                y: [0, -2, 0]
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
             >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Module
-            </Button>
-            <div className="text-right">
               <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Assessment Results
               </h1>
               <p className="text-muted-foreground text-lg">Your Personalized Learning Pathway</p>
-            </div>
+            </motion.div>
           </motion.div>
 
           {/* Enhanced Summary */}
