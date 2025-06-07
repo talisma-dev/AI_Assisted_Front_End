@@ -17,7 +17,7 @@ const EnhancedLogout = () => {
 
   return (
     <motion.div 
-      className="fixed top-4 right-4 z-50"
+      className="fixed top-6 right-6 z-50"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5 }}
@@ -26,65 +26,105 @@ const EnhancedLogout = () => {
         onClick={handleLogout}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className="group relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-slate-500/90 via-gray-600/90 to-slate-700/90 hover:from-blue-500/90 hover:via-purple-500/90 hover:to-indigo-600/90 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden backdrop-blur-sm border border-white/20"
+        className="group relative flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-600 hover:from-purple-600 hover:via-pink-500 hover:to-orange-500 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden"
         whileHover={{ 
           scale: 1.05,
-          transition: { duration: 0.2 }
+          rotateY: 5,
+          boxShadow: "0 0 40px rgba(59, 130, 246, 0.6)"
         }}
         whileTap={{ scale: 0.95 }}
       >
-        {/* Subtle Background Glow */}
+        {/* Animated Background Glow */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-indigo-400/20 rounded-xl blur-md opacity-0 group-hover:opacity-100"
-          transition={{ duration: 0.3 }}
+          className="absolute inset-0 bg-gradient-to-r from-cyan-400/30 via-blue-400/30 to-purple-400/30 rounded-2xl blur-xl"
+          animate={{
+            scale: isHovered ? [1, 1.2, 1] : 1,
+            opacity: isHovered ? [0.5, 0.8, 0.5] : 0.3
+          }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         />
         
-        {/* Gentle Shimmer effect */}
+        {/* Shimmer effect */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12"
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
           animate={{
             x: isHovered ? ["100%", "-100%"] : "100%"
           }}
-          transition={{ duration: 1, ease: "easeInOut" }}
+          transition={{ duration: 1.5, repeat: isHovered ? Infinity : 0, ease: "easeInOut" }}
         />
         
-        {/* AI Sparkle Icon */}
+        {/* AI Bot Wave Animation */}
         <motion.div
           animate={{ 
-            rotate: isHovered ? [0, 180] : 0,
-            scale: isHovered ? [1, 1.1, 1] : 1
+            rotate: isHovered ? [0, 360] : 0,
+            scale: isHovered ? [1, 1.2, 1] : 1
           }}
           transition={{ 
-            rotate: { duration: 0.5, ease: "easeInOut" },
-            scale: { duration: 0.6 }
+            rotate: { duration: 2, ease: "easeInOut" },
+            scale: { duration: 1, repeat: isHovered ? Infinity : 0, repeatDelay: 0.5 }
           }}
           className="relative z-10"
         >
-          <Sparkles className="h-4 w-4 text-yellow-300 drop-shadow-sm" />
+          <Sparkles className="h-5 w-5 text-yellow-300 drop-shadow-sm" />
         </motion.div>
         
-        <LogOut className="h-4 w-4 text-white drop-shadow-sm relative z-10 group-hover:rotate-6 transition-transform duration-200" />
-        <span className="text-white text-sm font-medium relative z-10 drop-shadow-sm">
+        <LogOut className="h-5 w-5 text-white drop-shadow-sm relative z-10 group-hover:rotate-12 transition-transform duration-300" />
+        <span className="text-white font-semibold relative z-10 drop-shadow-sm">
           Logout
         </span>
         
-        {/* Refined Tooltip */}
+        {/* Enhanced Tooltip */}
         <motion.div
-          initial={{ opacity: 0, y: 10, scale: 0.9 }}
+          initial={{ opacity: 0, y: 15, scale: 0.8 }}
           animate={{ 
             opacity: isHovered ? 1 : 0,
-            y: isHovered ? -45 : 10,
-            scale: isHovered ? 1 : 0.9
+            y: isHovered ? -55 : 15,
+            scale: isHovered ? 1 : 0.8
           }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
-          className="absolute -top-12 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-gray-800/95 text-white text-xs rounded-lg whitespace-nowrap pointer-events-none shadow-lg border border-white/10 backdrop-blur-sm"
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="absolute -top-14 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-gradient-to-r from-gray-800 to-gray-900 text-white text-sm rounded-xl whitespace-nowrap pointer-events-none shadow-xl border border-white/10"
         >
-          <div className="flex items-center gap-1">
-            <Sparkles className="h-2 w-2 text-yellow-400" />
-            See you soon, {state.currentUser?.username}! 👋
-          </div>
-          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent border-t-gray-800/95"></div>
+          <motion.div
+            animate={{
+              background: isHovered 
+                ? "linear-gradient(45deg, #1f2937, #374151, #1f2937)"
+                : "#1f2937"
+            }}
+            className="flex items-center gap-2"
+          >
+            <Sparkles className="h-3 w-3 text-yellow-400" />
+            See you next time, {state.currentUser?.username}! 👋
+          </motion.div>
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
         </motion.div>
+        
+        {/* Floating particles on hover */}
+        {isHovered && (
+          <>
+            {Array.from({ length: 6 }, (_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-1 h-1 bg-white/60 rounded-full"
+                style={{
+                  left: `${20 + i * 10}%`,
+                  top: `${30 + (i % 2) * 40}%`
+                }}
+                animate={{
+                  y: [-10, -30, -10],
+                  x: [0, Math.random() * 20 - 10, 0],
+                  opacity: [1, 0.5, 1],
+                  scale: [0.5, 1, 0.5]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  delay: i * 0.2,
+                  ease: "easeInOut"
+                }}
+              />
+            ))}
+          </>
+        )}
       </motion.button>
     </motion.div>
   );
