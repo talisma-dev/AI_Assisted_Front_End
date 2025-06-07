@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,6 +11,7 @@ import RubricFilterTabs from "@/components/RubricFilterTabs";
 import FloatingElements from "@/components/FloatingElements";
 import MCQResultsView from "@/components/MCQResultsView";
 import AnimatedBackground from "@/components/AnimatedBackground";
+import CelebrationEffect from "@/components/CelebrationEffect";
 import { ArrowLeft, BookOpen, CheckCircle, AlertTriangle, XCircle, Trophy, Target, TrendingUp, Award, Brain, Sparkles, Clock, BarChart, Eye, EyeOff } from "lucide-react";
 
 const Evaluation = () => {
@@ -410,6 +410,7 @@ const Evaluation = () => {
       <AnimatedBackground />
       <FloatingElements />
       <EnhancedLogout />
+      <CelebrationEffect />
       
       {/* Motivational AI Tutor Tip */}
       <AnimatePresence>
