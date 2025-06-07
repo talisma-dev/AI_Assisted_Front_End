@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,6 +11,7 @@ import RubricFilterTabs from "@/components/RubricFilterTabs";
 import FloatingElements from "@/components/FloatingElements";
 import MCQResultsView from "@/components/MCQResultsView";
 import AnimatedBackground from "@/components/AnimatedBackground";
+import CelebrationEffect from "@/components/CelebrationEffect";
 import { ArrowLeft, BookOpen, CheckCircle, AlertTriangle, XCircle, Trophy, Target, TrendingUp, Award, Brain, Sparkles, Clock, BarChart, Eye, EyeOff } from "lucide-react";
 
 const Evaluation = () => {
@@ -21,6 +21,7 @@ const Evaluation = () => {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [showMotivation, setShowMotivation] = useState(true);
   const [showMCQResults, setShowMCQResults] = useState<string | null>(null);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   // Enhanced MCQ results data with proper evaluation logic
   const mockMCQResults = {
@@ -113,7 +114,11 @@ const Evaluation = () => {
   };
 
   const handleNextModule = () => {
-    setShowCongratulations(true);
+    setShowCelebration(true);
+    setTimeout(() => {
+      setShowCongratulations(true);
+      setShowCelebration(false);
+    }, 3000);
   };
 
   const handleLearnMore = (concept: string) => {
@@ -411,6 +416,45 @@ const Evaluation = () => {
       <FloatingElements />
       <EnhancedLogout />
       
+      {/* Celebration Overlay */}
+      <AnimatePresence>
+        {showCelebration && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="relative bg-white rounded-2xl p-8 shadow-2xl max-w-md mx-4"
+            >
+              <CelebrationEffect />
+              <div className="text-center relative z-10">
+                <motion.div
+                  animate={{ 
+                    rotate: [0, 10, -10, 0],
+                    scale: [1, 1.1, 1]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="inline-flex p-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full mb-4"
+                >
+                  <Trophy className="h-8 w-8 text-white" />
+                </motion.div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                  Congratulations! 🎉
+                </h3>
+                <p className="text-gray-600">
+                  Preparing your next adventure...
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
       {/* Motivational AI Tutor Tip */}
       <AnimatePresence>
         {showMotivation && (
@@ -427,7 +471,7 @@ const Evaluation = () => {
               duration: 0.8,
               scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
             }}
-            className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 max-w-md"
+            className="fixed top-20 left-1/2 transform -translate-x-1/2 z-40 max-w-md"
           >
             <div className="bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 p-1 rounded-xl shadow-2xl">
               <div className="bg-white rounded-lg p-4 relative backdrop-blur-sm">
