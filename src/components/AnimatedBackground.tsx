@@ -1,45 +1,156 @@
 
 import React from 'react';
+import { motion } from 'framer-motion';
 
 const AnimatedBackground = () => {
   return (
     <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-      {/* Neural Network Grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:100px_100px] animate-pulse"></div>
+      {/* Enhanced Neural Network Grid */}
+      <motion.div 
+        className="absolute inset-0 opacity-30"
+        animate={{
+          backgroundPosition: ['0% 0%', '100% 100%']
+        }}
+        transition={{
+          duration: 20,
+          repeat: Infinity,
+          ease: "linear"
+        }}
+        style={{
+          backgroundImage: `
+            linear-gradient(90deg, rgba(59,130,246,0.1) 1px, transparent 1px),
+            linear-gradient(rgba(59,130,246,0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: '50px 50px'
+        }}
+      />
       
-      {/* Floating Particles */}
-      <div className="absolute top-10 left-10 w-2 h-2 bg-blue-400/30 rounded-full animate-float"></div>
-      <div className="absolute top-20 right-20 w-3 h-3 bg-purple-400/30 rounded-full animate-float" style={{ animationDelay: '1s' }}></div>
-      <div className="absolute bottom-20 left-1/4 w-1 h-1 bg-cyan-400/40 rounded-full animate-float" style={{ animationDelay: '2s' }}></div>
-      <div className="absolute bottom-40 right-1/3 w-2 h-2 bg-pink-400/30 rounded-full animate-float" style={{ animationDelay: '0.5s' }}></div>
-      <div className="absolute top-1/3 left-1/2 w-1 h-1 bg-green-400/30 rounded-full animate-float" style={{ animationDelay: '1.5s' }}></div>
-      
-      {/* Neural Connections */}
-      <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="neuralGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#3b82f6" />
-            <stop offset="50%" stopColor="#8b5cf6" />
-            <stop offset="100%" stopColor="#ec4899" />
-          </linearGradient>
-        </defs>
-        <g className="animate-pulse">
-          <path d="M100,200 Q300,100 500,300" stroke="url(#neuralGrad)" strokeWidth="1" fill="none" opacity="0.3" />
-          <path d="M200,400 Q400,200 600,400" stroke="url(#neuralGrad)" strokeWidth="1" fill="none" opacity="0.2" />
-          <path d="M50,300 Q250,150 450,350" stroke="url(#neuralGrad)" strokeWidth="1" fill="none" opacity="0.25" />
-        </g>
-      </svg>
-      
-      {/* Floating Educational Icons */}
-      <div className="absolute top-1/4 right-1/4 opacity-20">
-        <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-400 rounded-lg animate-float rotate-12">
-          <div className="w-full h-full flex items-center justify-center text-white text-lg">📚</div>
-        </div>
+      {/* Animated Gradient Overlay */}
+      <motion.div
+        className="absolute inset-0"
+        animate={{
+          background: [
+            'radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%)',
+            'radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%)',
+            'radial-gradient(circle at 40% 60%, rgba(236, 72, 153, 0.15) 0%, transparent 50%)',
+            'radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%)'
+          ]
+        }}
+        transition={{
+          duration: 12,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+
+      {/* Floating Tech Elements */}
+      <div className="absolute top-1/4 right-1/4 opacity-10">
+        <motion.div 
+          className="w-16 h-16 bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 rounded-2xl shadow-2xl"
+          animate={{ 
+            y: [0, -20, 0],
+            rotateY: [0, 180, 360],
+            scale: [1, 1.1, 1]
+          }}
+          transition={{ 
+            duration: 6, 
+            repeat: Infinity, 
+            ease: "easeInOut" 
+          }}
+        >
+          <div className="w-full h-full flex items-center justify-center text-white text-2xl font-bold">
+            🧠
+          </div>
+        </motion.div>
       </div>
-      <div className="absolute bottom-1/4 left-1/4 opacity-15">
-        <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-cyan-400 rounded-full animate-float" style={{ animationDelay: '2.5s' }}>
-          <div className="w-full h-full flex items-center justify-center text-white text-sm">🧠</div>
-        </div>
+
+      <div className="absolute bottom-1/3 left-1/5 opacity-15">
+        <motion.div 
+          className="w-12 h-12 bg-gradient-to-br from-green-400 via-cyan-500 to-blue-500 rounded-full shadow-xl"
+          animate={{ 
+            rotate: [0, 360],
+            scale: [1, 1.2, 1],
+            opacity: [0.15, 0.25, 0.15]
+          }}
+          transition={{ 
+            duration: 8, 
+            repeat: Infinity, 
+            ease: "easeInOut" 
+          }}
+        >
+          <div className="w-full h-full flex items-center justify-center text-white text-lg">
+            ⚡
+          </div>
+        </motion.div>
+      </div>
+
+      <div className="absolute top-2/3 right-1/3 opacity-12">
+        <motion.div 
+          className="w-14 h-14 bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 rounded-lg shadow-xl"
+          animate={{ 
+            x: [0, 15, 0],
+            y: [0, -15, 0],
+            rotate: [0, -45, 0]
+          }}
+          transition={{ 
+            duration: 7, 
+            repeat: Infinity, 
+            ease: "easeInOut" 
+          }}
+        >
+          <div className="w-full h-full flex items-center justify-center text-white text-xl">
+            🎯
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Matrix-style Code Rain Effect */}
+      {Array.from({ length: 15 }, (_, i) => (
+        <motion.div
+          key={`code-${i}`}
+          className="absolute text-green-400 font-mono text-xs opacity-20 select-none"
+          style={{
+            left: `${Math.random() * 100}%`,
+            fontSize: Math.random() * 8 + 8
+          }}
+          animate={{
+            y: ['-100vh', '100vh']
+          }}
+          transition={{
+            duration: Math.random() * 3 + 2,
+            delay: Math.random() * 5,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        >
+          {Math.random() > 0.5 ? '1' : '0'}
+        </motion.div>
+      ))}
+
+      {/* Pulse Rings */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        {Array.from({ length: 3 }, (_, i) => (
+          <motion.div
+            key={`ring-${i}`}
+            className="absolute border border-blue-400 rounded-full opacity-10"
+            style={{
+              width: 100 + i * 50,
+              height: 100 + i * 50,
+              top: -(50 + i * 25),
+              left: -(50 + i * 25)
+            }}
+            animate={{
+              scale: [1, 2, 1],
+              opacity: [0.1, 0.3, 0.1]
+            }}
+            transition={{
+              duration: 3,
+              delay: i * 0.5,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+        ))}
       </div>
     </div>
   );
