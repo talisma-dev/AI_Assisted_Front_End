@@ -1,4 +1,3 @@
-
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -131,7 +130,7 @@ const LearningResource = () => {
           <Button 
             variant="ghost" 
             onClick={() => navigate(`/learning/${encodeURIComponent(decodedConcept)}`)}
-            className="flex items-center gap-2 hover:scale-105 transition-all duration-200"
+            className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Learning
@@ -259,7 +258,7 @@ const LearningResource = () => {
                   <Button 
                     variant="outline"
                     onClick={() => navigate(`/learning/${encodeURIComponent(decodedConcept)}`)}
-                    className="border-green-600 text-green-600 hover:bg-green-50"
+                    className="border-green-600 text-green-600 hover:bg-green-50 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Back to Learning

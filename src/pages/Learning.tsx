@@ -1,4 +1,3 @@
-
 import { useNavigate, useParams } from "react-router-dom";
 import { useApp } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
@@ -108,7 +107,7 @@ const Learning = () => {
           <Button 
             variant="ghost" 
             onClick={() => navigate("/evaluation")}
-            className="flex items-center gap-2 hover:scale-105 transition-all duration-200"
+            className="flex items-center gap-2 bg-gradient-to-r from-slate-500 via-gray-500 to-zinc-500 hover:from-slate-600 hover:via-gray-600 hover:to-zinc-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Results
