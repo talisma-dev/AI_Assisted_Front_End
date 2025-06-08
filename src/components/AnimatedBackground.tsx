@@ -25,7 +25,7 @@ const AnimatedBackground = () => {
         }}
       />
       
-      {/* Enhanced AI-themed Gradient Overlay */}
+      {/* Killer AI-themed Gradient Overlay */}
       <motion.div
         className="absolute inset-0"
         animate={{
@@ -43,115 +43,83 @@ const AnimatedBackground = () => {
         }}
       />
 
-      {/* Exciting Learning Achievement Stars */}
-      {Array.from({ length: 12 }, (_, i) => (
-        <motion.div
-          key={`star-${i}`}
-          className="absolute text-yellow-400 text-2xl opacity-80"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-          }}
-          animate={{
-            scale: [0.5, 1.5, 0.5],
-            rotate: [0, 180, 360],
-            opacity: [0.3, 1, 0.3],
+      {/* Enhanced Learning-themed Elements with better visibility */}
+      <div className="absolute top-1/4 right-1/4 opacity-40">
+        <motion.div 
+          className="w-24 h-24 bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 rounded-3xl shadow-2xl flex items-center justify-center"
+          animate={{ 
             y: [0, -30, 0],
+            rotateY: [0, 180, 360],
+            rotateX: [0, 15, 0],
+            scale: [1, 1.2, 1]
           }}
-          transition={{
-            duration: 4 + Math.random() * 3,
-            delay: Math.random() * 2,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        >
-          ⭐
-        </motion.div>
-      ))}
-
-      {/* Lightning Bolt Success Animations */}
-      {Array.from({ length: 8 }, (_, i) => (
-        <motion.div
-          key={`lightning-${i}`}
-          className="absolute text-3xl opacity-70"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            color: '#fbbf24'
-          }}
-          animate={{
-            scale: [0, 1.2, 0],
-            rotate: [0, -15, 15, 0],
-            opacity: [0, 1, 0],
-          }}
-          transition={{
-            duration: 2.5,
-            delay: Math.random() * 5,
-            repeat: Infinity,
-            ease: "easeInOut"
+          transition={{ 
+            duration: 6, 
+            repeat: Infinity, 
+            ease: "easeInOut" 
           }}
         >
-          ⚡
+          <span className="text-white text-4xl">🧠</span>
         </motion.div>
-      ))}
+      </div>
 
-      {/* Floating Achievement Medals */}
-      {Array.from({ length: 6 }, (_, i) => (
-        <motion.div
-          key={`medal-${i}`}
-          className="absolute text-2xl opacity-60"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-          }}
-          animate={{
-            y: [0, -50, 0],
-            x: [0, 20, -20, 0],
+      <div className="absolute bottom-1/3 left-1/5 opacity-45">
+        <motion.div 
+          className="w-20 h-20 bg-gradient-to-br from-teal-400 via-cyan-500 to-blue-600 rounded-full shadow-2xl flex items-center justify-center"
+          animate={{ 
             rotate: [0, 360],
-            scale: [0.8, 1.3, 0.8],
+            scale: [1, 1.4, 1],
+            opacity: [0.45, 0.7, 0.45]
           }}
-          transition={{
-            duration: 6 + Math.random() * 2,
-            delay: Math.random() * 3,
-            repeat: Infinity,
-            ease: "easeInOut"
+          transition={{ 
+            duration: 8, 
+            repeat: Infinity, 
+            ease: "easeInOut" 
           }}
         >
-          🏆
+          <span className="text-white text-3xl">📚</span>
         </motion.div>
-      ))}
+      </div>
 
-      {/* Celebration Confetti Effect */}
-      {Array.from({ length: 20 }, (_, i) => (
-        <motion.div
-          key={`confetti-${i}`}
-          className="absolute w-3 h-3 opacity-80"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            background: `linear-gradient(45deg, 
-              hsl(${Math.random() * 360}, 80%, 70%), 
-              hsl(${Math.random() * 360}, 80%, 80%))`,
-            borderRadius: Math.random() > 0.5 ? '50%' : '0%'
+      <div className="absolute top-2/3 right-1/3 opacity-40">
+        <motion.div 
+          className="w-22 h-22 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 rounded-2xl shadow-2xl flex items-center justify-center"
+          animate={{ 
+            x: [0, 25, 0],
+            y: [0, -25, 0],
+            rotate: [0, -45, 0],
+            scale: [1, 1.3, 1]
           }}
-          animate={{
-            y: [0, -100, 100, 0],
-            x: [0, Math.random() * 50 - 25, 0],
-            rotate: [0, 720],
-            scale: [0.5, 1.2, 0.5],
-            opacity: [0.3, 1, 0.3]
+          transition={{ 
+            duration: 7, 
+            repeat: Infinity, 
+            ease: "easeInOut" 
           }}
-          transition={{
-            duration: 4 + Math.random() * 3,
-            delay: Math.random() * 4,
-            repeat: Infinity,
-            ease: "easeInOut"
+        >
+          <span className="text-white text-3xl">🎓</span>
+        </motion.div>
+      </div>
+
+      <div className="absolute top-1/3 left-1/4 opacity-35">
+        <motion.div 
+          className="w-18 h-18 bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600 rounded-xl shadow-2xl flex items-center justify-center"
+          animate={{ 
+            rotate: [0, 180, 360],
+            scale: [1, 1.25, 1],
+            opacity: [0.35, 0.6, 0.35]
           }}
-        />
-      ))}
+          transition={{ 
+            duration: 9, 
+            repeat: Infinity, 
+            ease: "easeInOut" 
+          }}
+        >
+          <span className="text-white text-2xl">📖</span>
+        </motion.div>
+      </div>
 
       {/* Enhanced Matrix-style Code Rain Effect */}
-      {Array.from({ length: 15 }, (_, i) => (
+      {Array.from({ length: 20 }, (_, i) => (
         <motion.div
           key={`code-${i}`}
           className="absolute text-cyan-400 font-mono text-sm opacity-50 select-none font-bold"
@@ -173,31 +141,32 @@ const AnimatedBackground = () => {
         </motion.div>
       ))}
 
-      {/* Progress Celebration Rockets */}
-      {Array.from({ length: 4 }, (_, i) => (
-        <motion.div
-          key={`rocket-${i}`}
-          className="absolute text-3xl opacity-70"
-          style={{
-            left: `${Math.random() * 100}%`,
-            bottom: '-50px',
-          }}
-          animate={{
-            y: [0, -window.innerHeight - 100],
-            x: [0, Math.random() * 100 - 50],
-            rotate: [0, 15, -15, 0],
-            scale: [0.8, 1.2, 0.8]
-          }}
-          transition={{
-            duration: 3 + Math.random() * 2,
-            delay: Math.random() * 8,
-            repeat: Infinity,
-            ease: "easeOut"
-          }}
-        >
-          🚀
-        </motion.div>
-      ))}
+      {/* Enhanced Pulse Rings with stronger colors */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        {Array.from({ length: 4 }, (_, i) => (
+          <motion.div
+            key={`ring-${i}`}
+            className="absolute border-2 rounded-full opacity-30"
+            style={{
+              width: 120 + i * 60,
+              height: 120 + i * 60,
+              top: -(60 + i * 30),
+              left: -(60 + i * 30),
+              borderColor: i % 2 === 0 ? '#06b6d4' : '#8b5cf6'
+            }}
+            animate={{
+              scale: [1, 2.5, 1],
+              opacity: [0.3, 0.7, 0.3]
+            }}
+            transition={{
+              duration: 4,
+              delay: i * 0.8,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+        ))}
+      </div>
 
       {/* AI Neural Network Connections */}
       <svg className="absolute inset-0 w-full h-full opacity-40" xmlns="http://www.w3.org/2000/svg">
@@ -239,13 +208,13 @@ const AnimatedBackground = () => {
       </svg>
 
       {/* Enhanced Floating Data Particles */}
-      {Array.from({ length: 25 }, (_, i) => (
+      {Array.from({ length: 30 }, (_, i) => (
         <motion.div
           key={`particle-${i}`}
           className="absolute rounded-full shadow-lg"
           style={{
-            width: Math.random() * 8 + 4,
-            height: Math.random() * 8 + 4,
+            width: Math.random() * 10 + 6,
+            height: Math.random() * 10 + 6,
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
             background: `linear-gradient(45deg, 
@@ -253,50 +222,38 @@ const AnimatedBackground = () => {
               hsl(${240 + Math.random() * 120}, 75%, 80%))`
           }}
           animate={{
-            y: [-30, 30],
-            x: [-20, 20],
+            y: [-40, 40],
+            x: [-30, 30],
             opacity: [0.3, 0.8, 0.3],
-            scale: [0.5, 1.2, 0.5]
+            scale: [0.5, 1.5, 0.5]
           }}
           transition={{
-            duration: 4 + Math.random() * 6,
-            delay: Math.random() * 3,
+            duration: 5 + Math.random() * 8,
+            delay: Math.random() * 4,
             repeat: Infinity,
             ease: "easeInOut"
           }}
         />
       ))}
 
-      {/* Success Fireworks Bursts */}
-      {Array.from({ length: 3 }, (_, i) => (
-        <motion.div
-          key={`firework-${i}`}
-          className="absolute"
-          style={{
-            left: `${20 + Math.random() * 60}%`,
-            top: `${20 + Math.random() * 60}%`,
-          }}
-        >
-          {Array.from({ length: 8 }, (_, j) => (
-            <motion.div
-              key={j}
-              className="absolute w-2 h-2 bg-gradient-to-r from-yellow-400 to-red-500 rounded-full"
-              animate={{
-                x: [0, Math.cos(j * 45 * Math.PI / 180) * 40],
-                y: [0, Math.sin(j * 45 * Math.PI / 180) * 40],
-                opacity: [1, 0],
-                scale: [1, 0]
-              }}
-              transition={{
-                duration: 2,
-                delay: Math.random() * 6,
-                repeat: Infinity,
-                ease: "easeOut"
-              }}
-            />
-          ))}
-        </motion.div>
-      ))}
+      {/* Enhanced AI Brain Wave Effect */}
+      <motion.div
+        className="absolute top-1/4 left-1/2 transform -translate-x-1/2 w-96 h-96 opacity-20"
+        animate={{
+          scale: [1, 1.3, 1],
+          rotate: [0, 360]
+        }}
+        transition={{
+          duration: 25,
+          repeat: Infinity,
+          ease: "linear"
+        }}
+      >
+        <div className="w-full h-full rounded-full border-4 border-cyan-400 relative shadow-2xl">
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 rounded-full border-3 border-blue-500 shadow-xl"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1/2 h-1/2 rounded-full border-2 border-purple-500 shadow-lg"></div>
+        </div>
+      </motion.div>
     </div>
   );
 };
