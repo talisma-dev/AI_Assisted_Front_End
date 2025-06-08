@@ -39,6 +39,7 @@ interface AppContextType {
   logout: () => void;
   submitAssessment: (answers: { [questionId: string]: number }, conceptFilter?: string) => void;
   updateConceptAttempts: (concept: string) => void;
+  showCongratulations: boolean;
   setShowCongratulations: (show: boolean) => void;
 }
 
