@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useApp } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
@@ -54,9 +53,8 @@ const ModuleLanding = () => {
               </div>
             </div>
             <Button 
-              variant="outline" 
-              onClick={handleLogout} 
-              className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 hover:scale-105 transition-all duration-200"
+              onClick={handleLogout}
+              className="flex items-center gap-2 bg-gradient-to-r from-red-500 via-pink-500 to-purple-600 hover:from-red-600 hover:via-pink-600 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 px-6 py-3"
             >
               <LogOut className="h-4 w-4" />
               Logout

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -483,9 +484,8 @@ const Evaluation = () => {
           >
             <motion.div whileHover={{ x: -5 }}>
               <Button 
-                variant="ghost" 
                 onClick={() => navigate("/module")}
-                className="flex items-center gap-2 hover:scale-105 transition-all duration-200 bg-white/10 backdrop-blur-sm border border-white/20"
+                className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 hover:from-cyan-600 hover:via-blue-600 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 px-6 py-3"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back to Module
