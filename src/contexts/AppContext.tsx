@@ -173,6 +173,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       logout,
       submitAssessment,
       updateConceptAttempts,
+      showCongratulations: state.showCongratulations,
       setShowCongratulations
     }}>
       {children}
