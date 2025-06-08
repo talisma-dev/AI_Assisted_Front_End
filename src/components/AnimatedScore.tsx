@@ -56,7 +56,7 @@ const AnimatedScore: React.FC<AnimatedScoreProps> = ({
     return () => clearTimeout(timer);
   }, [score, showCelebration]);
 
-  const circumference = 2 * Math.PI * 35;
+  const circumference = 2 * Math.PI * 32; // Adjusted radius for thicker stroke
   const strokeDasharray = circumference;
   const strokeDashoffset = circumference - (displayScore / 100) * circumference;
 
@@ -66,7 +66,7 @@ const AnimatedScore: React.FC<AnimatedScoreProps> = ({
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="relative"
+        className="relative flex items-center justify-center"
         style={{ width: size, height: size }}
       >
         <svg
@@ -79,20 +79,20 @@ const AnimatedScore: React.FC<AnimatedScoreProps> = ({
           <circle
             cx="40"
             cy="40"
-            r="35"
+            r="32"
             stroke="currentColor"
-            strokeWidth="6"
+            strokeWidth="10"
             fill="none"
             className="text-gray-200"
           />
           
-          {/* Progress Circle */}
+          {/* Progress Circle with thicker stroke */}
           <motion.circle
             cx="40"
             cy="40"
-            r="35"
+            r="32"
             stroke={getStrokeColor()}
-            strokeWidth="6"
+            strokeWidth="10"
             fill="none"
             strokeLinecap="round"
             initial={{ strokeDashoffset: circumference }}
@@ -105,8 +105,8 @@ const AnimatedScore: React.FC<AnimatedScoreProps> = ({
           />
         </svg>
         
-        {/* Score Text */}
-        <div className="absolute inset-0 flex items-center justify-center">
+        {/* Score Text with added spacing */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
           <motion.div
             className="text-center"
             initial={{ opacity: 0 }}
@@ -118,7 +118,16 @@ const AnimatedScore: React.FC<AnimatedScoreProps> = ({
               animate={{ scale: displayScore > 80 ? [1, 1.2, 1] : 1 }}
               transition={{ duration: 0.3 }}
             >
-              {displayScore}%
+              {displayScore}
+            </motion.span>
+            <div className="h-1"></div> {/* Added spacing between percentage and label */}
+            <motion.span
+              className="text-xs font-medium text-gray-500"
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+            >
+              %
             </motion.span>
           </motion.div>
         </div>

@@ -474,7 +474,7 @@ const Evaluation = () => {
 
       <div className="p-6 relative z-10">
         <div className="max-w-6xl mx-auto">
-          {/* Enhanced Header */}
+          {/* Enhanced Header with styled Back to Module button */}
           <motion.div 
             className="flex items-center justify-between mb-8"
             initial={{ opacity: 0, y: 20 }}
@@ -485,10 +485,23 @@ const Evaluation = () => {
               <Button 
                 variant="ghost" 
                 onClick={() => navigate("/module")}
-                className="flex items-center gap-2 hover:scale-105 transition-all duration-200 bg-white/10 backdrop-blur-sm border border-white/20"
+                className="group flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-cyan-100/80 via-blue-100/80 to-purple-100/80 hover:from-cyan-200/90 hover:via-blue-200/90 hover:to-purple-200/90 border-2 border-cyan-200/60 hover:border-blue-300/80 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm font-medium text-gray-700 hover:text-gray-800"
               >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Module
+                <motion.div
+                  className="p-1.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg shadow-md"
+                  whileHover={{ rotate: -15, scale: 1.1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                >
+                  <ArrowLeft className="h-4 w-4 text-white" />
+                </motion.div>
+                <span className="text-base">Back to Module</span>
+                <motion.div
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  animate={{ x: [0, 3, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  ✨
+                </motion.div>
               </Button>
             </motion.div>
             <motion.div 
