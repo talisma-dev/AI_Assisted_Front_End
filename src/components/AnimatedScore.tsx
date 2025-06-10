@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
@@ -114,7 +113,7 @@ const AnimatedScore: React.FC<AnimatedScoreProps> = ({
             transition={{ delay: 0.5 }}
           >
             <motion.span
-              className={`text-xl font-bold ${getColorClass()}`}
+              className={`text-sm font-bold ${getColorClass()}`}
               animate={{ scale: displayScore > 80 ? [1, 1.2, 1] : 1 }}
               transition={{ duration: 0.3 }}
             >

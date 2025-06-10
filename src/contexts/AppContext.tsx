@@ -1,5 +1,5 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { questionsData } from '@/pages/Assessment';
 
 interface User {
   student_id: string;
@@ -107,15 +107,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       outcomes.forEach(concept => {
         if (conceptFilter && concept !== conceptFilter) return;
         
-        const conceptQuestions = Object.keys(answers).filter(qId => 
-          qId.startsWith(concept.replace(/\s+/g, '').substring(0, 3))
-        );
+        // Get all questions for this concept
+        const conceptQuestions = questionsData.filter(q => q.concept === concept);
         
         if (conceptQuestions.length === 0) return;
         
-        const correctAnswers = conceptQuestions.filter(qId => {
-          // Simplified correct answer logic - in real app, this would reference actual questions
-          return Math.random() > 0.3; // Simulate 70% chance of correct answer
+        // Calculate correct answers for this concept
+        const correctAnswers = conceptQuestions.filter(q => {
+          const userAnswerIndex = answers[q.question_id];
+          if (userAnswerIndex === undefined) return false;
+          const userAnswer = q.options[userAnswerIndex];
+          return userAnswer === q.answer;
         }).length;
         
         const score = Math.round((correctAnswers / conceptQuestions.length) * 100);

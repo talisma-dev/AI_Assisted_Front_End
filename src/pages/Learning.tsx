@@ -4,22 +4,32 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, BookOpen, Play, Target, Lightbulb, FileText, Clock, Users, Award } from "lucide-react";
+import clsx from "clsx";
 
 const Learning = () => {
   const { concept } = useParams();
   const { state } = useApp();
   const navigate = useNavigate();
 
+  console.log('Learning component - Raw concept from params:', concept);
   const decodedConcept = decodeURIComponent(concept || "");
+  console.log('Learning component - Decoded concept:', decodedConcept);
   const conceptData = state.conceptScores.find(cs => cs.concept === decodedConcept);
+  console.log('Learning component - Found concept data:', conceptData);
 
   const handleReadyToTest = () => {
     navigate(`/assessment/${encodeURIComponent(decodedConcept)}`);
   };
 
   const handleResourceClick = (resourceId: string, resourceTitle: string) => {
-    navigate(`/learning/${encodeURIComponent(decodedConcept)}/resource/${resourceId}`, {
-      state: { resourceTitle, concept: decodedConcept }
+    console.log('Navigating to resource:', { resourceId, resourceTitle, concept: decodedConcept });
+    const path = `/learning/${encodeURIComponent(decodedConcept)}/resource/${resourceId}`;
+    console.log('Navigation path:', path);
+    navigate(path, {
+      state: { 
+        resourceTitle,
+        concept: decodedConcept
+      }
     });
   };
 
@@ -102,19 +112,28 @@ const Learning = () => {
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="max-w-4xl mx-auto">
-        {/* Header with enhanced animations */}
+        {/* Enhanced Header */}
         <div className="flex items-center justify-between mb-6 animate-fade-in">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             onClick={() => navigate("/evaluation")}
-            className="flex items-center gap-2 bg-gradient-to-r from-slate-500 via-gray-500 to-zinc-500 hover:from-slate-600 hover:via-gray-600 hover:to-zinc-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+            className={clsx(
+              "flex items-center gap-2 px-5 py-2 rounded-full font-semibold text-blue-700 bg-gradient-to-r from-blue-100 to-purple-100 border border-blue-200 shadow-sm",
+              "hover:from-blue-200 hover:to-purple-200 hover:shadow-md hover:scale-105 transition-all duration-200"
+            )}
           >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Results
+            <ArrowLeft className="h-5 w-5" />
+            <span className="ml-1">Back to Results</span>
           </Button>
-          <Badge variant="secondary" className="text-sm animate-pulse">
+          <span
+            className={clsx(
+              "px-4 py-1.5 rounded-full font-bold text-sm",
+              "bg-gradient-to-r from-purple-100 via-blue-100 to-pink-100 text-purple-700 border border-purple-200 shadow-sm",
+              "tracking-wide"
+            )}
+          >
             Learning Material
-          </Badge>
+          </span>
         </div>
 
         {/* Enhanced Concept Header */}
@@ -199,7 +218,7 @@ const Learning = () => {
                   <div 
                     key={index}
                     onClick={() => handleResourceClick(resource.id, resource.title)}
-                    className="group p-4 bg-gradient-to-r from-white to-gray-50 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105 hover:-translate-y-1"
+                    className="group cursor-pointer p-4 rounded-lg border border-gray-200 hover:border-blue-200 hover:shadow-lg transition-all duration-200 bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50"
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">

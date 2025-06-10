@@ -123,14 +123,14 @@ const LearningResource = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-white">
+      <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6 animate-fade-in">
+        <div className="flex items-center justify-between mb-6">
           <Button 
             variant="ghost" 
             onClick={() => navigate(`/learning/${encodeURIComponent(decodedConcept)}`)}
-            className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Learning
@@ -143,138 +143,70 @@ const LearningResource = () => {
           </div>
         </div>
 
-        {/* Resource Header */}
-        <Card className="mb-6 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-0 shadow-xl animate-scale-in">
+        {/* Resource Content */}
+        <Card className="bg-white shadow">
           <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg">
-                  <BookOpen className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <CardTitle className="text-2xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    {resourceTitle || "Learning Resource"}
-                  </CardTitle>
-                  <p className="text-muted-foreground">Part of {decodedConcept}</p>
-                </div>
-              </div>
-              <div className="text-right space-y-2">
-                <Badge className={getDifficultyColor(resource.difficulty)}>
-                  {resource.difficulty}
-                </Badge>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                  <span>{resource.duration}</span>
-                </div>
-              </div>
-            </div>
-            
-            {/* Progress Bar */}
-            <div className="mt-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Progress</span>
-                <span className="text-sm text-muted-foreground">{progress}%</span>
-              </div>
-              <Progress value={progress} className="h-2" />
+            <CardTitle className="text-2xl font-bold text-gray-900">
+              {resourceTitle || "Learning Resource"}
+            </CardTitle>
+            <div className="flex items-center gap-2 mt-2">
+              <Badge variant="secondary" className={getDifficultyColor(resource.difficulty)}>
+                {resource.difficulty}
+              </Badge>
+              <span className="text-sm text-gray-500">•</span>
+              <span className="text-sm text-gray-500">{resource.duration}</span>
             </div>
           </CardHeader>
+          <CardContent>
+            <div className="prose prose-blue max-w-none">
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-2">Introduction</h3>
+                <p>{resource.content.introduction}</p>
+              </div>
+              {resource.content.sections.map((section, index) => (
+                <div key={index} className="mb-6">
+                  <h3 className="text-lg font-semibold mb-2">{section.title}</h3>
+                  <p>{section.content}</p>
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-600">{section.interactive}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
         </Card>
 
-        {/* Resource Content */}
-        <div className="space-y-6 mb-8">
-          {/* Introduction */}
-          <Card className="hover:shadow-xl transition-all duration-300 animate-fade-in border-0 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Target className="h-5 w-5 text-blue-600" />
-                </div>
-                Introduction
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground leading-relaxed text-lg">
-                {resource.content.introduction}
+        {/* Completion Card */}
+        {isCompleted && (
+          <Card className="mt-6 bg-white shadow">
+            <CardContent className="p-6 text-center">
+              <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Great Job! 🎉
+              </h3>
+              <p className="text-gray-700 mb-4">
+                You've completed this learning resource. Ready to test your knowledge?
               </p>
+              <div className="flex gap-3 justify-center">
+                <Button 
+                  variant="outline"
+                  onClick={() => navigate(`/learning/${encodeURIComponent(decodedConcept)}`)}
+                  className="border-gray-300 hover:bg-gray-100"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Learning
+                </Button>
+                <Button 
+                  onClick={() => navigate(`/assessment/${encodeURIComponent(decodedConcept)}`)}
+                  className="bg-blue-600 text-white hover:bg-blue-700"
+                >
+                  <Play className="h-4 w-4 mr-2" />
+                  Take Assessment
+                </Button>
+              </div>
             </CardContent>
           </Card>
-
-          {/* Learning Sections */}
-          {resource.content.sections.map((section, index) => (
-            <Card 
-              key={index} 
-              className="hover:shadow-xl transition-all duration-300 animate-fade-in border-0 shadow-lg"
-              style={{ animationDelay: `${(index + 1) * 0.1}s` }}
-            >
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <div className="p-2 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg">
-                    <Lightbulb className="h-5 w-5 text-purple-600" />
-                  </div>
-                  {section.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground leading-relaxed">
-                  {section.content}
-                </p>
-                
-                {/* Interactive Component Placeholder */}
-                <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border-2 border-dashed border-blue-200 hover:border-blue-400 transition-all duration-200">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Play className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-blue-800">Interactive Component</h4>
-                      <p className="text-sm text-blue-600">{section.interactive}</p>
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-lg p-4 border border-blue-200">
-                    <div className="flex items-center justify-center h-32 text-muted-foreground">
-                      <div className="text-center">
-                        <Code className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                        <p className="text-sm">Interactive visualization would appear here</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-
-          {/* Completion Card */}
-          {isCompleted && (
-            <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-xl animate-scale-in">
-              <CardContent className="p-6 text-center">
-                <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-green-800 mb-2">
-                  Great Job! 🎉
-                </h3>
-                <p className="text-green-700 mb-4">
-                  You've completed this learning resource. Ready to test your knowledge?
-                </p>
-                <div className="flex gap-3 justify-center">
-                  <Button 
-                    variant="outline"
-                    onClick={() => navigate(`/learning/${encodeURIComponent(decodedConcept)}`)}
-                    className="border-green-600 text-green-600 hover:bg-green-50 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Learning
-                  </Button>
-                  <Button 
-                    onClick={() => navigate(`/assessment/${encodeURIComponent(decodedConcept)}`)}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    <Play className="h-4 w-4 mr-2" />
-                    Take Assessment
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

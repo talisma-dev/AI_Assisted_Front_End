@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "@/contexts/AppContext";
@@ -154,16 +153,6 @@ const Login = () => {
               </form>
             </CardContent>
           </Card>
-
-          {/* Enhanced Demo Credentials */}
-          <div className="text-center text-sm text-gray-300 animate-fade-in bg-white/5 backdrop-blur-sm p-4 rounded-xl border border-white/10">
-            <p className="mb-2 text-cyan-400 font-medium">🚀 Demo Credentials:</p>
-            <div className="space-y-1 font-mono text-xs">
-              <p className="text-green-400">Ankul / Ankul123</p>
-              <p className="text-blue-400">Riya / Riya123</p>
-              <p className="text-purple-400">Donson / Donson123</p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
