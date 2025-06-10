@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "@/contexts/AppContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Brain, Chip, CircuitBoard, BookOpen, Sparkles, Zap, Cpu } from "lucide-react";
+import { Brain, Cpu, CircuitBoard, BookOpen, Sparkles, Zap } from "lucide-react";
 
 interface StudentData {
   id: string;
@@ -107,7 +106,7 @@ const Login = () => {
 
       {/* Floating AI Elements */}
       <FloatingIcon Icon={Brain} delay={0} size={32} className="top-10 left-10" />
-      <FloatingIcon Icon={Chip} delay={1} size={28} className="top-20 right-20" />
+      <FloatingIcon Icon={Cpu} delay={1} size={28} className="top-20 right-20" />
       <FloatingIcon Icon={CircuitBoard} delay={2} size={24} className="bottom-32 left-16" />
       <FloatingIcon Icon={BookOpen} delay={0.5} size={30} className="bottom-20 right-32" />
       <FloatingIcon Icon={Cpu} delay={1.5} size={26} className="top-40 right-10" />
