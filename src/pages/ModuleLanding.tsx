@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useApp } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, LogOut, Play, Target, Users, Brain, Sparkles, Zap, ArrowRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { BookOpen, LogOut, Play, Target, Users, Brain, Sparkles, Zap, ArrowRight, TrendingUp } from "lucide-react";
 
 const ModuleLanding = () => {
   const { state, logout } = useApp();
@@ -17,6 +18,32 @@ const ModuleLanding = () => {
     logout();
     navigate("/");
   };
+
+  const getEngagementBadge = (level: string) => (
+    <Badge 
+      variant={level === 'High' ? 'default' : 'secondary'}
+      className={`text-sm font-semibold px-4 py-2 ${
+        level === 'High' 
+          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg animate-pulse' 
+          : 'bg-gradient-to-r from-orange-400 to-amber-400 text-white shadow-lg'
+      } transition-all duration-300`}
+    >
+      {level === 'High' ? '🔥 High Engagement' : '⚡ Needs Boost'}
+    </Badge>
+  );
+
+  const getPerformanceBadge = (level: string) => (
+    <Badge 
+      variant={level === 'High' ? 'default' : 'secondary'}
+      className={`text-sm font-semibold px-4 py-2 ${
+        level === 'High' 
+          ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg animate-pulse' 
+          : 'bg-gradient-to-r from-pink-400 to-rose-400 text-white shadow-lg'
+      } transition-all duration-300`}
+    >
+      {level === 'High' ? '🏆 Excellent Performance' : '📈 Growing Strong'}
+    </Badge>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
@@ -45,7 +72,7 @@ const ModuleLanding = () => {
               </div>
               <div>
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                  Welcome back, {state.currentUser?.username}!
+                  Welcome back, {state.currentUser?.name}!
                 </h1>
                 <div className="flex items-center gap-2 mt-1">
                   <Zap className="h-4 w-4 text-yellow-500 animate-pulse" />
@@ -62,14 +89,15 @@ const ModuleLanding = () => {
             </Button>
           </div>
 
-          {/* Enhanced Module Info */}
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
+          {/* Module Info and Student Status */}
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            {/* Module Information */}
             <Card className="border-0 shadow-xl bg-white/10 backdrop-blur-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 animate-scale-in">
               <CardHeader className="relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10"></div>
                 <CardTitle className="flex items-center gap-3 relative">
                   <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
-                    <Target className="h-6 w-6 text-white" />
+                    <BookOpen className="h-6 w-6 text-white" />
                   </div>
                   <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     Current Module
@@ -77,59 +105,103 @@ const ModuleLanding = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-3">
-                  {state.currentUser?.module_name}
+                <h2 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-3">
+                  Artificial Learning and Machine Learning
                 </h2>
-                <div className="space-y-2 text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                    <span>Module ID: {state.currentUser?.module_id}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse delay-200"></div>
-                    <span>Course ID: {state.currentUser?.course_id}</span>
-                  </div>
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  Advanced AI and ML concepts for modern applications
+                </p>
               </CardContent>
             </Card>
 
+            {/* Engagement Level */}
             <Card className="border-0 shadow-xl bg-white/10 backdrop-blur-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 animate-scale-in" style={{ animationDelay: '0.1s' }}>
               <CardHeader className="relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-teal-500/10"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-teal-500/10"></div>
                 <CardTitle className="flex items-center gap-3 relative">
-                  <div className="p-2 bg-gradient-to-r from-green-600 to-teal-600 rounded-lg">
-                    <Users className="h-6 w-6 text-white" />
+                  <div className="p-2 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-lg">
+                    <Zap className="h-6 w-6 text-white" />
                   </div>
-                  <span className="bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
-                    Learning Objectives
+                  <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                    Engagement
                   </span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  <li className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-all duration-200">
-                    <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-medium">Bayesian Inference principles</span>
-                  </li>
-                  <li className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-all duration-200">
-                    <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full animate-pulse delay-200"></div>
-                    <span className="text-sm font-medium">Feature Selection techniques</span>
-                  </li>
-                  <li className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-all duration-200">
-                    <div className="w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse delay-400"></div>
-                    <span className="text-sm font-medium">Linear & Non-Linear Models</span>
-                  </li>
-                  <li className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-all duration-200">
-                    <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-red-400 rounded-full animate-pulse delay-600"></div>
-                    <span className="text-sm font-medium">Gaussian distributions</span>
-                  </li>
-                </ul>
+              <CardContent className="space-y-4">
+                <div className="flex justify-center">
+                  {getEngagementBadge(state.currentUser?.engagement || 'Low')}
+                </div>
+                <p className="text-sm text-muted-foreground text-center">
+                  {state.currentUser?.engagement === 'High' 
+                    ? 'You\'re actively participating and staying engaged!' 
+                    : 'Consider increasing your participation to boost engagement.'}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Performance Level */}
+            <Card className="border-0 shadow-xl bg-white/10 backdrop-blur-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 animate-scale-in" style={{ animationDelay: '0.2s' }}>
+              <CardHeader className="relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10"></div>
+                <CardTitle className="flex items-center gap-3 relative">
+                  <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
+                    <TrendingUp className="h-6 w-6 text-white" />
+                  </div>
+                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Performance
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-center">
+                  {getPerformanceBadge(state.currentUser?.performance || 'Low')}
+                </div>
+                <p className="text-sm text-muted-foreground text-center">
+                  {state.currentUser?.performance === 'High' 
+                    ? 'Outstanding academic progress! Keep it up!' 
+                    : 'You\'re making steady progress. Keep practicing!'}
+                </p>
               </CardContent>
             </Card>
           </div>
 
+          {/* Learning Objectives */}
+          <Card className="border-0 shadow-xl bg-white/10 backdrop-blur-lg hover:shadow-2xl transition-all duration-500 animate-scale-in mb-8" style={{ animationDelay: '0.3s' }}>
+            <CardHeader className="relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-teal-500/10"></div>
+              <CardTitle className="flex items-center gap-3 relative">
+                <div className="p-2 bg-gradient-to-r from-green-600 to-teal-600 rounded-lg">
+                  <Target className="h-6 w-6 text-white" />
+                </div>
+                <span className="bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
+                  Learning Objectives
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-all duration-200">
+                  <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium">Bayesian Inference</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-all duration-200">
+                  <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full animate-pulse delay-200"></div>
+                  <span className="text-sm font-medium">Feature Selection</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-all duration-200">
+                  <div className="w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse delay-400"></div>
+                  <span className="text-sm font-medium">Linear & Non-Linear Models</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-all duration-200">
+                  <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-red-400 rounded-full animate-pulse delay-600"></div>
+                  <span className="text-sm font-medium">Gaussian Distributions</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Enhanced Assessment Card */}
-          <Card className="border-0 shadow-2xl bg-gradient-to-r from-blue-50/50 via-purple-50/50 to-pink-50/50 backdrop-blur-lg hover:shadow-3xl transition-all duration-500 animate-scale-in" style={{ animationDelay: '0.2s' }}>
+          <Card className="border-0 shadow-2xl bg-gradient-to-r from-blue-50/50 via-purple-50/50 to-pink-50/50 backdrop-blur-lg hover:shadow-3xl transition-all duration-500 animate-scale-in" style={{ animationDelay: '0.4s' }}>
             <CardHeader className="text-center relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 animate-shimmer"></div>
               <div className="relative">
