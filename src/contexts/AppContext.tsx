@@ -1,13 +1,15 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface User {
   student_id: string;
+  name: string;
   username: string;
   password: string;
   course_id: string;
   module_id: string;
   module_name: string;
+  engagement: 'Low' | 'High';
+  performance: 'Low' | 'High';
 }
 
 interface Question {
@@ -36,6 +38,7 @@ interface AppState {
 interface AppContextType {
   state: AppState;
   login: (username: string, password: string) => boolean;
+  loginWithStudent: (studentData: any) => boolean;
   logout: () => void;
   submitAssessment: (answers: { [questionId: string]: number }, conceptFilter?: string) => void;
   updateConceptAttempts: (concept: string) => void;
@@ -46,9 +49,39 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const validUsers: User[] = [
-  { student_id: "S001", username: "Ankul", password: "Ankul123", course_id: "C202", module_id: "M101", module_name: "Algorithm" },
-  { student_id: "S002", username: "Riya", password: "Riya123", course_id: "C202", module_id: "M101", module_name: "Algorithm" },
-  { student_id: "S003", username: "Donson", password: "Donson123", course_id: "C202", module_id: "M101", module_name: "Algorithm" },
+  { 
+    student_id: "S001", 
+    name: "Robert Garcia",
+    username: "Ankul", 
+    password: "Ankul123", 
+    course_id: "C202", 
+    module_id: "M101", 
+    module_name: "Algorithm",
+    engagement: "Low",
+    performance: "Low"
+  },
+  { 
+    student_id: "S002", 
+    name: "Priya Sharma",
+    username: "Riya", 
+    password: "Riya123", 
+    course_id: "C202", 
+    module_id: "M101", 
+    module_name: "Algorithm",
+    engagement: "High",
+    performance: "Low"
+  },
+  { 
+    student_id: "S003", 
+    name: "Leo Mark",
+    username: "Donson", 
+    password: "Donson123", 
+    course_id: "C202", 
+    module_id: "M101", 
+    module_name: "Algorithm",
+    engagement: "Low",
+    performance: "High"
+  },
 ];
 
 const outcomes = [
@@ -76,6 +109,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const login = (username: string, password: string): boolean => {
     const user = validUsers.find(u => u.username === username && u.password === password);
+    if (user) {
+      setState(prev => ({ ...prev, currentUser: user }));
+      return true;
+    }
+    return false;
+  };
+
+  const loginWithStudent = (studentData: any): boolean => {
+    const user = validUsers.find(u => u.username === studentData.username);
     if (user) {
       setState(prev => ({ ...prev, currentUser: user }));
       return true;
@@ -170,6 +212,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     <AppContext.Provider value={{
       state,
       login,
+      loginWithStudent,
       logout,
       submitAssessment,
       updateConceptAttempts,

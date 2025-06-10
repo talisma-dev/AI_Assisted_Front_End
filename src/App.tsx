@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProvider } from "./contexts/AppContext";
 import AnimatedBackground from "./components/AnimatedBackground";
 import Login from "./pages/Login";
+import StudentDashboard from "./pages/StudentDashboard";
 import ModuleLanding from "./pages/ModuleLanding";
 import Assessment from "./pages/Assessment";
 import Evaluation from "./pages/Evaluation";
@@ -28,6 +29,11 @@ const App = () => (
             <AnimatedBackground />
             <Routes>
               <Route path="/" element={<Login />} />
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <StudentDashboard />
+                </ProtectedRoute>
+              } />
               <Route path="/module" element={
                 <ProtectedRoute>
                   <ModuleLanding />
