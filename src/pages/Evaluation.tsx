@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,7 +13,6 @@ import FloatingElements from "@/components/FloatingElements";
 import MCQResultsView from "@/components/MCQResultsView";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import CelebrationEffect from "@/components/CelebrationEffect";
-import { questionsData } from "@/pages/Assessment";
 import { ArrowLeft, BookOpen, CheckCircle, AlertTriangle, XCircle, Trophy, Target, TrendingUp, Award, Brain, Sparkles, Clock, BarChart, Eye, EyeOff } from "lucide-react";
 
 const Evaluation = () => {
@@ -23,40 +23,73 @@ const Evaluation = () => {
   const [showMotivation, setShowMotivation] = useState(true);
   const [showMCQResults, setShowMCQResults] = useState<string | null>(null);
 
-  // Calculate actual MCQ results from assessment data
-  const calculateMCQResults = () => {
-    const results: { [concept: string]: any[] } = {};
-    
-    // Group questions by concept
-    questionsData.forEach(question => {
-      if (!results[question.concept]) {
-        results[question.concept] = [];
+  // Enhanced MCQ results data with proper evaluation logic
+  const mockMCQResults = {
+    "Machine Learning Fundamentals": [
+      {
+        questionId: "ml-1",
+        question: "What is the primary goal of supervised learning?",
+        userAnswer: "To learn from labeled data to make predictions",
+        correctAnswer: "To learn from labeled data to make predictions",
+        options: [
+          "To learn from labeled data to make predictions",
+          "To find hidden patterns in unlabeled data",
+          "To maximize rewards through trial and error",
+          "To reduce dimensionality of data"
+        ],
+        isCorrect: true,
+        explanation: "Supervised learning uses labeled training data to learn a mapping function that can make predictions on new, unseen data."
+      },
+      {
+        questionId: "ml-2",
+        question: "Which algorithm is best for classification tasks?",
+        userAnswer: "Linear Regression",
+        correctAnswer: "Random Forest",
+        options: [
+          "Linear Regression",
+          "Random Forest",
+          "K-Means Clustering",
+          "Principal Component Analysis"
+        ],
+        isCorrect: false,
+        explanation: "Random Forest is a powerful ensemble method for classification, while Linear Regression is used for regression tasks."
+      },
+      {
+        questionId: "ml-3",
+        question: "What does overfitting mean in machine learning?",
+        userAnswer: "Model performs well on training data but poorly on test data",
+        correctAnswer: "Model performs well on training data but poorly on test data",
+        options: [
+          "Model performs poorly on both training and test data",
+          "Model performs well on training data but poorly on test data",
+          "Model takes too long to train",
+          "Model uses too many features"
+        ],
+        isCorrect: true,
+        explanation: "Overfitting occurs when a model learns the training data too well, including noise and outliers, leading to poor generalization."
       }
-      
-      const userAnswerIndex = state.assessmentAnswers[question.question_id];
-      const userAnswer = userAnswerIndex !== undefined ? question.options[userAnswerIndex] : null;
-      
-      if (userAnswer !== null) {
-        results[question.concept].push({
-          questionId: question.question_id,
-          question: question.question,
-          userAnswer: userAnswer,
-          correctAnswer: question.answer,
-          options: question.options,
-          isCorrect: userAnswer === question.answer,
-          explanation: `This question tests your understanding of ${question.concept}. The correct answer is "${question.answer}" because it best represents the key concept.`
-        });
+    ],
+    "Data Science Principles": [
+      {
+        questionId: "ds-1",
+        question: "What is the purpose of data visualization?",
+        userAnswer: "To make data look pretty",
+        correctAnswer: "To communicate insights and patterns in data effectively",
+        options: [
+          "To make data look pretty",
+          "To communicate insights and patterns in data effectively",
+          "To hide data complexity",
+          "To replace statistical analysis"
+        ],
+        isCorrect: false,
+        explanation: "Data visualization is a powerful tool for communicating complex information clearly and helping stakeholders understand data insights."
       }
-    });
-    
-    return results;
+    ]
   };
-
-  const mcqResults = calculateMCQResults();
 
   // Calculate overall MCQ performance
   const calculateOverallMCQScore = () => {
-    const allResults = Object.values(mcqResults).flat();
+    const allResults = Object.values(mockMCQResults).flat();
     const correctAnswers = allResults.filter(r => r.isCorrect).length;
     return Math.round((correctAnswers / allResults.length) * 100);
   };
@@ -130,7 +163,7 @@ const Evaluation = () => {
   const ConceptCard = ({ concept, index }: { concept: any; index: number }) => {
     const isExpanded = expandedCard === concept.concept;
     const showingMCQ = showMCQResults === concept.concept;
-    const hasResults = mcqResults[concept.concept];
+    const hasResults = mockMCQResults[concept.concept as keyof typeof mockMCQResults];
     
     return (
       <motion.div
@@ -261,7 +294,7 @@ const Evaluation = () => {
               </div>
 
               {/* MCQ Results Toggle */}
-              {/* {hasResults && (
+              {hasResults && (
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
                     variant="outline"
@@ -281,10 +314,10 @@ const Evaluation = () => {
                     )}
                   </Button>
                 </motion.div>
-              )} */}
+              )}
 
               {/* MCQ Results Display */}
-              {/* <AnimatePresence>
+              <AnimatePresence>
                 {showingMCQ && hasResults && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
@@ -301,7 +334,7 @@ const Evaluation = () => {
                     </div>
                   </motion.div>
                 )}
-              </AnimatePresence> */}
+              </AnimatePresence>
 
               {/* Expanded card content */}
               <AnimatePresence>
@@ -348,31 +381,26 @@ const Evaluation = () => {
                   </motion.div>
                 )}
               </AnimatePresence>
+
+              {concept.status === 'remediation' && (
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200 hover:from-orange-100 hover:to-yellow-100 transition-all duration-200 shadow-sm hover:shadow-md"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleLearnMore(concept.concept);
+                    }}
+                  >
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Continue Learning
+                  </Button>
+                </motion.div>
+              )}
             </div>
           </CardContent>
         </Card>
-
-        {/* Continue Learning Button - Moved outside the card */}
-        {concept.status !== 'mastery' && (
-          <motion.div
-            className="mt-4"
-            whileHover={{ scale: 1.02 }} 
-            whileTap={{ scale: 0.98 }}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleLearnMore(concept.concept);
-            }}
-          >
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="w-full bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200 hover:from-orange-100 hover:to-yellow-100 transition-all duration-200 shadow-sm hover:shadow-md"
-            >
-              <BookOpen className="h-4 w-4 mr-2" />
-              Continue Learning
-            </Button>
-          </motion.div>
-        )}
       </motion.div>
     );
   };
@@ -609,16 +637,49 @@ const Evaluation = () => {
               <Card className="bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 border-green-200 shadow-xl hover:shadow-2xl transition-all duration-300 backdrop-blur-sm">
                 <CardContent className="p-8 text-center">
                   <div className="mb-6">
-                    <div className="relative inline-flex">
-                      <Trophy className="h-16 w-16 text-green-600" />
-                      <Sparkles className="absolute -top-2 -right-2 h-8 w-8 text-yellow-500" />
+                    <motion.div 
+                      className="inline-flex p-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full mb-4 shadow-lg"
+                      animate={{ 
+                        rotate: [0, 10, -10, 0],
+                        scale: [1, 1.1, 1],
+                        boxShadow: [
+                          "0 10px 20px rgba(0, 0, 0, 0.1)",
+                          "0 20px 40px rgba(251, 191, 36, 0.4)",
+                          "0 10px 20px rgba(0, 0, 0, 0.1)"
+                        ]
+                      }}
+                      transition={{ 
+                        duration: 2, 
+                        repeat: Infinity, 
+                        repeatDelay: 1 
+                      }}
+                    >
+                      <Trophy className="h-8 w-8 text-white" />
+                    </motion.div>
+                    <div className="flex justify-center gap-2 mb-4">
+                      {[0, 1, 2].map((i) => (
+                        <motion.div
+                          key={i}
+                          animate={{ 
+                            scale: [1, 1.2, 1],
+                            opacity: [0.5, 1, 0.5]
+                          }}
+                          transition={{ 
+                            duration: 1.5, 
+                            repeat: Infinity,
+                            delay: i * 0.2
+                          }}
+                        >
+                          <Award className="h-6 w-6 text-yellow-500" />
+                        </motion.div>
+                      ))}
                     </div>
                   </div>
-                  <h3 className="text-3xl font-bold mb-3 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                    Analysis Complete! 🎉
+                  <h3 className="text-3xl font-bold text-green-800 mb-3 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                    Outstanding Achievement! 🎉
                   </h3>
                   <p className="text-green-700 mb-6 text-lg">
-                    Congratulations! You've mastered all concepts with an overall MCQ score of {overallMCQScore}%! Your analysis is complete and you're ready for the next level!
+                    You've mastered all concepts with an overall MCQ score of {overallMCQScore}%! Ready for the next level!
                   </p>
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button 

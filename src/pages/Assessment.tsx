@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useApp } from "@/contexts/AppContext";
@@ -20,7 +21,7 @@ interface Question {
 }
 
 // Your provided questions data
-export const questionsData: Question[] = [
+const questionsData: Question[] = [
   {
     question_id: "Q1",
     question_type: "MCQ",
@@ -268,20 +269,8 @@ const Assessment = () => {
 
     // Calculate results
     const newResults: { [questionId: string]: boolean } = {};
-    const conceptScores: { [concept: string]: { correct: number; total: number } } = {};
-    
     questions.forEach(q => {
-      const isCorrect = answers[q.question_id] === q.answer;
-      newResults[q.question_id] = isCorrect;
-      
-      // Calculate scores per concept
-      if (!conceptScores[q.concept]) {
-        conceptScores[q.concept] = { correct: 0, total: 0 };
-      }
-      conceptScores[q.concept].total++;
-      if (isCorrect) {
-        conceptScores[q.concept].correct++;
-      }
+      newResults[q.question_id] = answers[q.question_id] === q.answer;
     });
     
     setResults(newResults);
@@ -300,12 +289,6 @@ const Assessment = () => {
     if (concept) {
       updateConceptAttempts(concept);
     }
-    
-    // Display concept scores
-    Object.entries(conceptScores).forEach(([concept, { correct, total }]) => {
-      const score = Math.round((correct / total) * 100);
-      toast.success(`${concept}: ${correct}/${total} correct (${score}%)`);
-    });
     
     toast.success("Assessment submitted successfully!");
   };
