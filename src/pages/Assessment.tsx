@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useApp } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,8 +7,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Clock, BookOpen, Brain, Zap, Sparkles } from "lucide-react";
+import { ArrowLeft, Clock, BookOpen, Brain, Zap, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { getQuestionsData } from "@/api/getQuestionsData";
+import AnimatedBackground from "@/components/AnimatedBackground";
+import { evaluateAssessment } from "@/api/evaluateAssessment";
 
 interface Question {
   question_id: string;
@@ -20,237 +22,22 @@ interface Question {
   answer: string;
 }
 
-// Your provided questions data
-const questionsData: Question[] = [
-  {
-    question_id: "Q1",
-    question_type: "MCQ",
-    concept: "Bayesian Inference",
-    question: "Which of the following machine learning categories uses labeled data for training?",
-    options: [
-      "Unsupervised Learning",
-      "Supervised Learning", 
-      "Reinforcement Learning",
-      "All of the above"
-    ],
-    answer: "Supervised Learning"
-  },
-  {
-    question_id: "Q2",
-    question_type: "MCQ",
-    concept: "Bayesian Inference",
-    question: "In the context of unsupervised learning, how does an algorithm handle data?",
-    options: [
-      "It assigns data points to pre-defined categories.",
-      "It requires human intervention to label data before analysis.",
-      "It analyzes and clusters unlabeled data based on similarities.",
-      "It predicts numerical values based on labeled data."
-    ],
-    answer: "It analyzes and clusters unlabeled data based on similarities."
-  },
-  {
-    question_id: "Q3",
-    question_type: "MCQ",
-    concept: "Bayesian Inference",
-    question: "Which of the following is NOT an example of a supervised learning algorithm mentioned in the text?",
-    options: [
-      "Linear classifiers",
-      "K-means clustering",
-      "Decision trees",
-      "Support vector machines"
-    ],
-    answer: "K-means clustering"
-  },
-  {
-    question_id: "Q4",
-    question_type: "MCQ",
-    concept: "Bayesian Inference",
-    question: "What is a key characteristic that distinguishes supervised learning from unsupervised learning?",
-    options: [
-      "The use of algorithms",
-      "The type of data used (labeled vs. unlabeled)",
-      "The need for human intervention",
-      "The prediction of numerical values"
-    ],
-    answer: "The type of data used (labeled vs. unlabeled)"
-  },
-  {
-    question_id: "Q5",
-    question_type: "MCQ",
-    concept: "Feature Selection & Dimensionality Reduction",
-    question: "Why is dimensionality reduction used in machine learning?",
-    options: [
-      "To increase the complexity of the model",
-      "To reduce the number of features while preserving data integrity",
-      "To add more noise to the data",
-      "To make the data more difficult to interpret"
-    ],
-    answer: "To reduce the number of features while preserving data integrity"
-  },
-  {
-    question_id: "Q6",
-    question_type: "MCQ",
-    concept: "Feature Selection & Dimensionality Reduction",
-    question: "Which of the following is NOT mentioned in the context as an example of a dimensionality reduction technique or algorithm?",
-    options: [
-      "Autoencoders",
-      "K-Means clustering",
-      "Apriori algorithm",
-      "Linear Regression"
-    ],
-    answer: "Linear Regression"
-  },
-  {
-    question_id: "Q7",
-    question_type: "MCQ",
-    concept: "Feature Selection & Dimensionality Reduction",
-    question: "In the context of dimensionality reduction, what is often a preprocessing step?",
-    options: [
-      "Model training",
-      "Data visualization",
-      "Removing noise from visual data (as mentioned with autoencoders)",
-      "Feature engineering"
-    ],
-    answer: "Removing noise from visual data (as mentioned with autoencoders)"
-  },
-  {
-    question_id: "Q8",
-    question_type: "MCQ",
-    concept: "Feature Selection & Dimensionality Reduction",
-    question: "According to the provided text, what is a common application of dimensionality reduction?",
-    options: [
-      "Improving model interpretability by adding more features",
-      "Increasing computational cost",
-      "Improving picture quality by removing noise from visual data",
-      "Decreasing the efficiency of machine learning algorithms"
-    ],
-    answer: "Improving picture quality by removing noise from visual data"
-  },
-  {
-    question_id: "Q9",
-    question_type: "MCQ",
-    concept: "Linear & Non-Linear Models",
-    question: "Which of the following is an example of a linear regression algorithm?",
-    options: [
-      "Logistic Regression",
-      "Polynomial Regression",
-      "Linear Regression",
-      "K-Means Clustering"
-    ],
-    answer: "Linear Regression"
-  },
-  {
-    question_id: "Q10",
-    question_type: "MCQ",
-    concept: "Linear & Non-Linear Models",
-    question: "Which algorithm is NOT typically used for classification problems as mentioned in the text?",
-    options: [
-      "Linear classifiers",
-      "Support Vector Machines",
-      "K-Means Clustering",
-      "Decision Trees"
-    ],
-    answer: "K-Means Clustering"
-  },
-  {
-    question_id: "Q11",
-    question_type: "MCQ",
-    concept: "Linear & Non-Linear Models",
-    question: "Polynomial regression is an example of which type of model?",
-    options: [
-      "Linear Model",
-      "Non-Linear Model",
-      "Supervised Learning Model",
-      "Unsupervised Learning Model"
-    ],
-    answer: "Non-Linear Model"
-  },
-  {
-    question_id: "Q12",
-    question_type: "MCQ",
-    concept: "Linear & Non-Linear Models",
-    question: "The Apriori algorithm is most closely associated with which unsupervised learning technique?",
-    options: [
-      "Clustering",
-      "Dimensionality Reduction",
-      "Association",
-      "Regression"
-    ],
-    answer: "Association"
-  },
-  {
-    question_id: "Q13",
-    question_type: "MCQ",
-    concept: "Gaussian distributions and decision boundaries",
-    question: "Which of the following machine learning categories would be MOST suitable for classifying emails as spam or not spam?",
-    options: [
-      "Unsupervised Learning",
-      "Reinforcement Learning",
-      "Supervised Learning",
-      "Semi-supervised Learning"
-    ],
-    answer: "Supervised Learning"
-  },
-  {
-    question_id: "Q14",
-    question_type: "MCQ",
-    concept: "Gaussian distributions and decision boundaries",
-    question: "In the context of the provided text, which algorithm is an example of supervised learning?",
-    options: [
-      "K-means clustering",
-      "Logistic Regression",
-      "None of the above",
-      "All of the above"
-    ],
-    answer: "Logistic Regression"
-  },
-  {
-    question_id: "Q15",
-    question_type: "MCQ",
-    concept: "Gaussian distributions and decision boundaries",
-    question: "Which of the following is NOT a characteristic of unsupervised learning?",
-    options: [
-      "Works with unlabeled data",
-      "Discovers hidden patterns",
-      "Requires human intervention for labeling data",
-      "Assigns data into predefined categories"
-    ],
-    answer: "Assigns data into predefined categories"
-  },
-  {
-    question_id: "Q16",
-    question_type: "MCQ",
-    concept: "Gaussian distributions and decision boundaries",
-    question: "According to the text, what is a key difference between supervised and unsupervised learning?",
-    options: [
-      "The type of data used",
-      "Whether the training data is labeled",
-      "The complexity of the algorithms",
-      "Both A and B"
-    ],
-    answer: "Both A and B"
-  }
-];
-
 const Assessment = () => {
   const { concept } = useParams();
-  const { state, submitAssessment, updateConceptAttempts } = useApp();
+  const location = useLocation();
+  const conceptFromState = (location.state as any)?.conceptName as string | undefined;
+  const { state, submitAssessment, updateConceptAttempts, setAssessmentQuestions, setConceptScores } = useApp();
   const navigate = useNavigate();
-  
-  // Filter questions based on concept or use all questions
-  const [questions] = useState<Question[]>(() => {
-    if (concept) {
-      const decodedConcept = decodeURIComponent(concept);
-      return questionsData.filter(q => q.concept === decodedConcept);
-    }
-    return questionsData;
-  });
 
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<{ [questionId: string]: string }>({});
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [submitted, setSubmitted] = useState(false);
-  const [results, setResults] = useState<{ [questionId: string]: boolean }>({});
+  const [results, setResults] = useState<{ [questionId: string]: boolean }>(() => ({}));
   const [isScanning, setIsScanning] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [hasFetchedQuestions, setHasFetchedQuestions] = useState(false);
 
   const handleAnswerChange = (questionId: string, value: string) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
@@ -264,33 +51,64 @@ const Assessment = () => {
 
     setIsScanning(true);
 
-    // AI scanning animation delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Brief animation delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Calculate results
-    const newResults: { [questionId: string]: boolean } = {};
-    questions.forEach(q => {
-      newResults[q.question_id] = answers[q.question_id] === q.answer;
-    });
-    
-    setResults(newResults);
-    setSubmitted(true);
-    setIsScanning(false);
-    
-    // Convert string answers to number indices for the app context
-    const numericAnswers: { [questionId: string]: number } = {};
-    questions.forEach(q => {
-      const answerIndex = q.options.findIndex(option => option === answers[q.question_id]);
-      numericAnswers[q.question_id] = answerIndex;
-    });
-    
-    submitAssessment(numericAnswers, concept);
-    
-    if (concept) {
-      updateConceptAttempts(concept);
+    try {
+      // Build payload: { Q1: "selected answer", Q2: "..." }
+      const payload: Record<string, string> = {};
+      questions.forEach(q => {
+        payload[q.question_id] = answers[q.question_id];
+      });
+
+      const remediationConceptName = conceptFromState
+        ? conceptFromState
+        : concept
+          ? decodeURIComponent(concept)
+          : (questions.length > 0 ? questions[0].concept : null);
+      const { evaluationData } = await evaluateAssessment(payload, remediationConceptName);
+
+      // Map backend evaluation into conceptScores in context
+      const mappedScores = evaluationData.map(item => {
+        const rawLevel = (item.level ?? '').toString().trim();
+        const normalizedLevel = rawLevel.replace(/^["']|["']$/g, '').replace(/_/g, ' ');
+        const levelLower = normalizedLevel.toLowerCase();
+        let status: 'mastery' | 'remediation' | 'intervention';
+        let label: 'Mastered' | 'Needs Review' | 'Contact Advisor';
+        if (levelLower === 'mastered') {
+          status = 'mastery';
+          label = 'Mastered';
+        } else if (levelLower === 'intermediate') {
+          status = 'remediation';
+          label = 'Needs Review';
+        } else if (levelLower === 'novice' || levelLower === 'contact advisor') {
+          status = 'intervention';
+          label = 'Contact Advisor';
+        } else {
+          // Default fallback
+          status = 'intervention';
+          label = 'Contact Advisor';
+        }
+        const numericScore = typeof item.score === 'string' ? Number(item.score) : item.score;
+        return {
+          concept: item.concept,
+          score: Number.isFinite(numericScore) ? (numericScore as number) : 0,
+          attempts: item.attemptCount ?? 0,
+          status,
+          label,
+        };
+      });
+
+      setConceptScores(mappedScores);
+      setSubmitted(true);
+      toast.success("Assessment evaluated successfully");
+      navigate("/evaluation");
+    } catch (err) {
+      console.error('Error evaluating assessment:', err);
+      toast.error("Failed to evaluate assessment. Please try again.");
+    } finally {
+      setIsScanning(false);
     }
-    
-    toast.success("Assessment submitted successfully!");
   };
 
   const handleFinish = () => {
@@ -314,6 +132,171 @@ const Assessment = () => {
   const correctAnswers = Object.values(results).filter(Boolean).length;
   const totalQuestions = questions.length;
 
+  // After submission, use the context score for the concept
+  const conceptScoreObj = state.conceptScores.find(cs => cs.concept === concept);
+  const contextScore = conceptScoreObj
+    ? conceptScoreObj.score
+    : Number((correctAnswers / totalQuestions) * 100).toFixed(1);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchQuestions() {
+      // If questions are already set in context, use them regardless of source
+      if ((state.assessmentQuestions && state.assessmentQuestions.length > 0) || hasFetchedQuestions) {
+        setQuestions(state.assessmentQuestions || []);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+        let params;
+        const studentId = localStorage.getItem('studentId') || 'S001';
+        if (concept) {
+          params = {
+            module_id: "M101",
+            course_id: "ATHENA 1-A",
+            student_id: studentId,
+            module_name: "Safe Medication Practice",
+            outcomes: [decodeURIComponent(concept)],
+            remedition: true,
+            num_questions: 4,
+          };
+        } else {
+          params = {
+            module_id: "M101",
+            course_id: "ATHENA 1-A",
+            student_id: studentId,
+            module_name: "Safe Medication Practice",
+            outcomes: [
+              "Storage Practices",
+              "Medication Ordering and Transcription",
+              "Dispensing and High-Alert Medications",
+              "Dosage and IV Infusion Calculations",
+            ],
+            remedition: false,
+            num_questions: 16,
+          };
+        }
+        console.log('Fetching questions with params:', params);
+        const fetchedQuestions = await getQuestionsData(params);
+        console.log('Received questions:', fetchedQuestions);
+
+        if (!isMounted) return;
+
+        if (!fetchedQuestions) {
+          throw new Error("No response from the API");
+        }
+
+        if (!Array.isArray(fetchedQuestions)) {
+          throw new Error("Invalid response format from API");
+        }
+
+        if (fetchedQuestions.length === 0) {
+          throw new Error("No questions received from the API");
+        }
+
+        // Validate question format
+        const isValidQuestion = (q: any) => {
+          return q &&
+            typeof q.question_id === 'string' &&
+            typeof q.question === 'string' &&
+            Array.isArray(q.options) &&
+            typeof q.answer === 'string' &&
+            typeof q.concept === 'string';
+        };
+
+        const invalidQuestions = fetchedQuestions.filter(q => !isValidQuestion(q));
+        if (invalidQuestions.length > 0) {
+          console.error('Invalid questions found:', invalidQuestions);
+          throw new Error("Some questions have invalid format");
+        }
+
+        setQuestions(fetchedQuestions);
+        setAssessmentQuestions(fetchedQuestions);
+        setHasFetchedQuestions(true);
+      } catch (err) {
+        if (!isMounted) return;
+        console.error("Error fetching questions:", err);
+        const errorMessage = err instanceof Error ? err.message : "Failed to load questions. Please try again later.";
+        setError(errorMessage);
+        toast.error(errorMessage);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchQuestions();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [state.assessmentSource, concept, setAssessmentQuestions, hasFetchedQuestions, state.assessmentQuestions]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 relative">
+        <AnimatedBackground />
+        <Card className="bg-white/10 backdrop-blur-lg border-white/20 shadow-2xl">
+          <CardContent className="p-12 text-center">
+            <Loader2 className="h-12 w-12 text-white animate-spin mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-white">Loading Questions...</h2>
+            <p className="text-white/80 mt-2">Please wait while we prepare your assessment</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
+        <Card className="bg-white/10 backdrop-blur-lg border-white/20 shadow-2xl">
+          <CardContent className="p-12 text-center">
+            <h2 className="text-2xl font-bold text-white mb-4">Error Loading Assessment</h2>
+            <p className="text-white/80 mb-6">{error}</p>
+            <Button
+              onClick={() => window.location.reload()}
+              className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white"
+            >
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (questions.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
+        <Card className="bg-white/10 backdrop-blur-lg border-white/20 shadow-2xl">
+          <CardContent className="p-12 text-center">
+            <h2 className="text-2xl font-bold text-white mb-4">No Questions Available</h2>
+            <p className="text-white/80 mb-6">There are no questions available for this assessment.</p>
+            <Button
+              onClick={() => {
+                if (state.assessmentSource === 'learning' && concept) {
+                  navigate(`/learning/${encodeURIComponent(concept)}`);
+                  return;
+                }
+                const sid = localStorage.getItem('studentId');
+                navigate(sid ? `/lms` : "/lms");
+              }}
+              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white"
+            >
+              Return
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (isScanning) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 relative overflow-hidden">
@@ -324,7 +307,7 @@ const Assessment = () => {
           <div className="absolute bottom-1/3 right-1/4 w-24 h-24 bg-pink-400/30 rounded-full animate-ping delay-1000"></div>
           <div className="absolute top-1/2 right-1/3 w-16 h-16 bg-yellow-400/30 rounded-full animate-ping delay-500"></div>
         </div>
-        
+
         <Card className="relative z-10 bg-white/10 backdrop-blur-lg border-white/20 shadow-2xl">
           <CardContent className="p-12 text-center">
             <div className="mb-8">
@@ -356,7 +339,7 @@ const Assessment = () => {
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full animate-pulse"></div>
         <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-pink-400/10 to-cyan-400/10 rounded-full animate-pulse delay-1000"></div>
-        
+
         {/* Neural Network Nodes */}
         <div className="absolute top-20 left-20 w-4 h-4 bg-blue-400/40 rounded-full animate-ping"></div>
         <div className="absolute top-40 right-32 w-3 h-3 bg-purple-400/40 rounded-full animate-ping delay-500"></div>
@@ -367,16 +350,22 @@ const Assessment = () => {
       <div className="relative z-10 p-6">
         <div className="max-w-4xl mx-auto">
           {/* Enhanced Header */}
-          <div className="flex items-center justify-between mb-6 animate-fade-in">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate(-1)}
-              className="flex items-center gap-2 hover:scale-105 transition-all duration-200 bg-white/10 backdrop-blur-sm border border-white/20"
+          <div className="flex items-center justify-end mb-6 animate-fade-in">
+            <Button
+              onClick={() => {
+                if (state.assessmentSource === 'learning' && concept) {
+                  navigate(`/learning/${encodeURIComponent(concept)}`);
+                  return;
+                }
+                const sid = localStorage.getItem('studentId');
+                navigate(sid ? `/lms` : "/lms");
+              }}
+              className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 hover:from-cyan-600 hover:via-blue-600 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 px-6 py-3"
             >
               <ArrowLeft className="h-4 w-4" />
               Back
             </Button>
-            <div className="flex items-center gap-4">
+            {/* <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full">
                 <Clock className="h-4 w-4" />
                 No time limit
@@ -385,14 +374,14 @@ const Assessment = () => {
                 <BookOpen className="h-4 w-4" />
                 {concept || "Full Assessment"}
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Enhanced Progress Section */}
           <div className="mb-6 animate-scale-in">
             <div className="flex justify-between items-center mb-2">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                {concept ? `${concept} Assessment` : "AI Learning Assessment"}
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                {concept ? `${concept} Assessment` : "Artificial Learning and Machine Learning Assessment"}
               </h1>
               <div className="flex items-center gap-2">
                 <Zap className="h-5 w-5 text-yellow-500 animate-pulse" />
@@ -401,9 +390,9 @@ const Assessment = () => {
                 </span>
               </div>
             </div>
-            <Progress value={progress} className="h-3 bg-white/20 overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-full transition-all duration-500 ease-out animate-pulse" 
-                   style={{ width: `${progress}%` }} />
+            <Progress value={progress} className="h-2 bg-white/50 overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-full transition-all duration-500 ease-out animate-pulse"
+                style={{ width: `${progress}%` }} />
             </Progress>
           </div>
 
@@ -414,32 +403,32 @@ const Assessment = () => {
               <div className="relative flex items-center justify-between">
                 <Badge variant="secondary" className="mb-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white border-0">
                   <Brain className="h-3 w-3 mr-1" />
-                  {currentQ.concept}
+                  {currentQ?.concept || "Loading..."}
                 </Badge>
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-yellow-500 animate-pulse" />
-                  <span className="text-sm text-muted-foreground">#{currentQ.question_id}</span>
+                  <span className="text-sm text-muted-foreground">#{currentQ?.question_id || "..."}</span>
                 </div>
               </div>
               <CardTitle className="text-xl leading-relaxed text-gray-800 relative">
-                {currentQ.question}
+                {currentQ?.question || "Loading question..."}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <RadioGroup
-                value={answers[currentQ.question_id] || ""}
-                onValueChange={(value) => handleAnswerChange(currentQ.question_id, value)}
-                className="space-y-4"
+                value={answers[currentQ?.question_id] || ""}
+                onValueChange={(value) => handleAnswerChange(currentQ?.question_id, value)}
+                className="space-y-1"
               >
-                {currentQ.options.map((option, index) => (
+                {currentQ?.options?.map((option, index) => (
                   <div key={index} className="flex items-center space-x-3 group">
-                    <RadioGroupItem 
-                      value={option} 
+                    <RadioGroupItem
+                      value={option}
                       id={`${currentQ.question_id}_${index}`}
                       className="border-2 border-indigo-300 text-indigo-600 hover:border-indigo-500 transition-all duration-200"
                     />
-                    <Label 
-                      htmlFor={`${currentQ.question_id}_${index}`} 
+                    <Label
+                      htmlFor={`${currentQ.question_id}_${index}`}
                       className="flex-1 cursor-pointer p-4 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200 group-hover:scale-[1.02] border border-transparent hover:border-indigo-200 hover:shadow-lg"
                     >
                       {option}
@@ -452,35 +441,34 @@ const Assessment = () => {
 
           {/* Enhanced Navigation */}
           <div className="flex justify-between items-center mb-6">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={prevQuestion}
               disabled={currentQuestion === 0}
               className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 hover:scale-105 transition-all duration-200"
             >
               Previous
             </Button>
-            
+
             <div className="flex gap-2">
               {questions.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentQuestion(index)}
-                  className={`w-10 h-10 rounded-full text-sm font-medium transition-all duration-300 hover:scale-110 ${
-                    index === currentQuestion 
-                      ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg transform scale-110' 
-                      : answers[questions[index].question_id]
+                  className={`w-10 h-10 rounded-full text-sm font-medium transition-all duration-300 hover:scale-110 ${index === currentQuestion
+                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg transform scale-110'
+                    : answers[questions[index].question_id]
                       ? 'bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-md hover:shadow-lg'
                       : 'bg-white/20 backdrop-blur-sm border border-white/30 text-gray-700 hover:bg-white/30'
-                  }`}
+                    }`}
                 >
                   {index + 1}
                 </button>
               ))}
             </div>
 
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={nextQuestion}
               disabled={currentQuestion === questions.length - 1}
               className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 hover:scale-105 transition-all duration-200"
@@ -502,7 +490,7 @@ const Assessment = () => {
                 <p className="text-muted-foreground mb-4 text-lg">
                   You've answered {Object.keys(answers).length} of {questions.length} questions.
                 </p>
-                <Button 
+                <Button
                   onClick={handleSubmit}
                   disabled={Object.keys(answers).length !== questions.length}
                   size="lg"
@@ -522,17 +510,17 @@ const Assessment = () => {
                     <Sparkles className="absolute -top-2 -right-2 h-8 w-8 text-yellow-500 animate-spin" />
                   </div>
                 </div>
-                <h3 className="text-3xl font-bold mb-3 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                <h3 className="text-3xl font-bold mb-3 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                   Analysis Complete! 🎉
                 </h3>
                 <p className="text-muted-foreground mb-2 text-lg">
                   You scored {correctAnswers} out of {totalQuestions} questions correctly.
                 </p>
                 <p className="text-2xl font-bold mb-6 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                  Score: {Math.round((correctAnswers / totalQuestions) * 100)}%
+                  Score: {contextScore}%
                 </p>
-                <Button 
-                  onClick={handleFinish} 
+                <Button
+                  onClick={handleFinish}
                   size="lg"
                   className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                 >

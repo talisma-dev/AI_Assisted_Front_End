@@ -1,4 +1,3 @@
-
 import { useApp } from "@/contexts/AppContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -34,7 +33,7 @@ const CongratulationsModal = () => {
             Outstanding Achievement!
           </div>
           <p className="text-muted-foreground">
-            You have successfully completed the <strong>{state.currentUser?.module_name}</strong> module 
+            You have successfully completed the <strong>Artificial Learning and Machine Learning</strong> module 
             with mastery in all learning objectives. Your dedication and hard work have paid off!
           </p>
           <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">

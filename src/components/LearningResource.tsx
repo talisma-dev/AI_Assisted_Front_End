@@ -85,33 +85,7 @@ const LearningResource = () => {
     }
   };
 
-  const getDefaultContent = () => ({
-    type: "Learning Material",
-    duration: "20 min",
-    difficulty: "Intermediate",
-    content: {
-      introduction: `Comprehensive learning material for ${resourceTitle || 'this concept'}.`,
-      sections: [
-        {
-          title: "Core Concepts",
-          content: "Understanding the fundamental principles and theory.",
-          interactive: "Interactive examples and demonstrations."
-        },
-        {
-          title: "Practical Applications",
-          content: "Real-world applications and use cases.",
-          interactive: "Hands-on exercises and practice problems."
-        },
-        {
-          title: "Advanced Topics",
-          content: "Deep dive into advanced concepts and techniques.",
-          interactive: "Complex scenarios and case studies."
-        }
-      ]
-    }
-  });
-
-  const resource = resourceContent[resourceId as keyof typeof resourceContent] || getDefaultContent();
+  const resource = resourceContent[resourceId as keyof typeof resourceContent];
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {

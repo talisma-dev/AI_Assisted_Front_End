@@ -1,19 +1,19 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useApp } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import EnhancedLogout from "@/components/EnhancedLogout";
 import AnimatedScore from "@/components/AnimatedScore";
 import RubricFilterTabs from "@/components/RubricFilterTabs";
 import FloatingElements from "@/components/FloatingElements";
 import MCQResultsView from "@/components/MCQResultsView";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import CelebrationEffect from "@/components/CelebrationEffect";
-import { ArrowLeft, BookOpen, CheckCircle, AlertTriangle, XCircle, Trophy, Target, TrendingUp, Award, Brain, Sparkles, Clock, BarChart, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle, AlertTriangle, XCircle, Trophy, Target, TrendingUp, Award, Brain, Sparkles, Clock, BarChart, Eye, EyeOff, Repeat, Loader2 } from "lucide-react";
+import { generateContent } from '@/api/generateContent';
+import { updateAssessmentDetails } from '@/api/updateAssessmentDetails';
 
 const Evaluation = () => {
   const { state, setShowCongratulations } = useApp();
@@ -22,76 +22,51 @@ const Evaluation = () => {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [showMotivation, setShowMotivation] = useState(true);
   const [showMCQResults, setShowMCQResults] = useState<string | null>(null);
+  const [loadingConcept, setLoadingConcept] = useState<string | null>(null);
+  const [hasCalledAPI, setHasCalledAPI] = useState(false);
 
-  // Enhanced MCQ results data with proper evaluation logic
-  const mockMCQResults = {
-    "Machine Learning Fundamentals": [
-      {
-        questionId: "ml-1",
-        question: "What is the primary goal of supervised learning?",
-        userAnswer: "To learn from labeled data to make predictions",
-        correctAnswer: "To learn from labeled data to make predictions",
-        options: [
-          "To learn from labeled data to make predictions",
-          "To find hidden patterns in unlabeled data",
-          "To maximize rewards through trial and error",
-          "To reduce dimensionality of data"
-        ],
-        isCorrect: true,
-        explanation: "Supervised learning uses labeled training data to learn a mapping function that can make predictions on new, unseen data."
-      },
-      {
-        questionId: "ml-2",
-        question: "Which algorithm is best for classification tasks?",
-        userAnswer: "Linear Regression",
-        correctAnswer: "Random Forest",
-        options: [
-          "Linear Regression",
-          "Random Forest",
-          "K-Means Clustering",
-          "Principal Component Analysis"
-        ],
-        isCorrect: false,
-        explanation: "Random Forest is a powerful ensemble method for classification, while Linear Regression is used for regression tasks."
-      },
-      {
-        questionId: "ml-3",
-        question: "What does overfitting mean in machine learning?",
-        userAnswer: "Model performs well on training data but poorly on test data",
-        correctAnswer: "Model performs well on training data but poorly on test data",
-        options: [
-          "Model performs poorly on both training and test data",
-          "Model performs well on training data but poorly on test data",
-          "Model takes too long to train",
-          "Model uses too many features"
-        ],
-        isCorrect: true,
-        explanation: "Overfitting occurs when a model learns the training data too well, including noise and outliers, leading to poor generalization."
-      }
-    ],
-    "Data Science Principles": [
-      {
-        questionId: "ds-1",
-        question: "What is the purpose of data visualization?",
-        userAnswer: "To make data look pretty",
-        correctAnswer: "To communicate insights and patterns in data effectively",
-        options: [
-          "To make data look pretty",
-          "To communicate insights and patterns in data effectively",
-          "To hide data complexity",
-          "To replace statistical analysis"
-        ],
-        isCorrect: false,
-        explanation: "Data visualization is a powerful tool for communicating complex information clearly and helping stakeholders understand data insights."
-      }
-    ]
+  const getDisplayLabel = (label: string) => {
+    if (label === 'Contact Advisor') return 'Novice';
+    if (label === 'Needs Review') return 'Intermediate';
+    return label;
   };
 
-  // Calculate overall MCQ performance
+  // Calculate actual MCQ results from assessment data
+  const calculateMCQResults = () => {
+    const results: { [concept: string]: any[] } = {};
+    
+    // Use questions from context
+    (state.assessmentQuestions || []).forEach(question => {
+      if (!results[question.concept]) {
+        results[question.concept] = [];
+      }
+      
+      const userAnswerIndex = state.assessmentAnswers[question.question_id];
+      const userAnswer = userAnswerIndex !== undefined ? question.options[userAnswerIndex] : null;
+      
+      if (userAnswer !== null) {
+        results[question.concept].push({
+          questionId: question.question_id,
+          question: question.question,
+          userAnswer: userAnswer,
+          correctAnswer: question.answer,
+          options: question.options,
+          isCorrect: userAnswer === question.answer,
+          explanation: `This question tests your understanding of ${question.concept}. The correct answer is "${question.answer}" because it best represents the key concept.`
+        });
+      }
+    });
+    
+    return results;
+  };
+
+  const mcqResults = calculateMCQResults();
+
+  // Calculate overall MCQ performance (now using average of concept scores)
   const calculateOverallMCQScore = () => {
-    const allResults = Object.values(mockMCQResults).flat();
-    const correctAnswers = allResults.filter(r => r.isCorrect).length;
-    return Math.round((correctAnswers / allResults.length) * 100);
+    if (!state.conceptScores || state.conceptScores.length === 0) return 0;
+    const total = state.conceptScores.reduce((sum, cs) => sum + (typeof cs.score === 'number' ? cs.score : 0), 0);
+    return Math.round(total / state.conceptScores.length);
   };
 
   const masteryAchieved = state.conceptScores.filter(cs => cs.status === 'mastery');
@@ -160,10 +135,17 @@ const Evaluation = () => {
     }
   };
 
+  const handleContinueLearning = (conceptName: string) => {
+    navigate(`/learning/${encodeURIComponent(conceptName)}`, {
+      state: { triggerContentLoad: true }
+    });
+  };
+
   const ConceptCard = ({ concept, index }: { concept: any; index: number }) => {
     const isExpanded = expandedCard === concept.concept;
     const showingMCQ = showMCQResults === concept.concept;
-    const hasResults = mockMCQResults[concept.concept as keyof typeof mockMCQResults];
+    const hasResults = mcqResults[concept.concept];
+    const isContactAdvisor = concept.status === 'intervention';
     
     return (
       <motion.div
@@ -195,8 +177,8 @@ const Evaluation = () => {
         />
         
         <Card 
-          className={`relative bg-gradient-to-r ${getStatusColor(concept.status)} border shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer overflow-hidden backdrop-blur-sm`}
-          onClick={() => setExpandedCard(isExpanded ? null : concept.concept)}
+          className={`relative bg-gradient-to-r ${getStatusColor(concept.status)} border shadow-lg hover:shadow-2xl transition-all duration-500 ${isContactAdvisor ? 'cursor-pointer' : 'cursor-default'} overflow-hidden backdrop-blur-sm`}
+          onClick={isContactAdvisor ? () => setExpandedCard(isExpanded ? null : concept.concept) : undefined}
         >
           <motion.div
             className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0"
@@ -227,15 +209,18 @@ const Evaluation = () => {
                   {getStatusIcon(concept.status)}
                 </motion.div>
                 <div>
-                  <CardTitle className="text-lg font-semibold bg-gradient-to-r from-gray-700 to-gray-900 bg-clip-text text-transparent">
-                    {concept.concept}
+                  <CardTitle
+                    className="text-lg font-semibold bg-gradient-to-r from-gray-700 to-gray-900 bg-clip-text text-transparent cursor-help"
+                    title={concept.concept}
+                  >
+                    {concept.concept.length > 20 ? concept.concept.slice(0, 20) + '...' : concept.concept}
                   </CardTitle>
                   <motion.div whileHover={{ scale: 1.05 }}>
                     <Badge 
                       variant={concept.status === 'mastery' ? 'default' : 'secondary'} 
                       className="mt-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white"
                     >
-                      {concept.label}
+                      {getDisplayLabel(concept.label)}
                     </Badge>
                   </motion.div>
                 </div>
@@ -285,16 +270,13 @@ const Evaluation = () => {
                   />
                   <span className="font-medium">{getStatusText(concept.status)}</span>
                 </div>
-                {concept.attempts > 0 && (
-                  <div className="text-xs text-muted-foreground flex items-center gap-1">
-                    <TrendingUp className="h-3 w-3" />
-                    {concept.attempts} attempts
-                  </div>
-                )}
+                <span className="ml-auto flex items-center gap-1 text-xs text-gray-500 font-semibold">
+                  <Repeat className="h-4 w-4 text-purple-400" /> Attempts: {concept.attempts || 0}
+                </span>
               </div>
 
               {/* MCQ Results Toggle */}
-              {hasResults && (
+              {/* {hasResults && (
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
                     variant="outline"
@@ -314,7 +296,7 @@ const Evaluation = () => {
                     )}
                   </Button>
                 </motion.div>
-              )}
+              )} */}
 
               {/* MCQ Results Display */}
               <AnimatePresence>
@@ -338,7 +320,36 @@ const Evaluation = () => {
 
               {/* Expanded card content */}
               <AnimatePresence>
-                {isExpanded && (
+                {isExpanded && isContactAdvisor && (
+                  <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.95, opacity: 0 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  className="relative z-10"
+                >
+                  <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+                    <div className="relative z-10">
+                      <h4 className="flex items-center gap-3 text-lg font-semibold text-purple-700 mb-3">
+                        <Brain className="h-5 w-5 text-purple-500 animate-bounce-slow" />
+                        Appointment Scheduled
+                      </h4>
+                      <div className="text-sm text-gray-800 space-y-1">
+                        <div>
+                          <span className="font-medium text-gray-900">👩‍🏫 Faculty:</span> Luna Elizabeth
+                        </div>
+                        <div>
+                          <span className="font-medium text-gray-900">📅 Date:</span> <span className="text-blue-600">21-JUN-2025</span>
+                        </div>
+                        <div>
+                          <span className="font-medium text-gray-900">⏰ Time:</span> <span className="text-green-600">11:00 AM - 1:00 PM</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+                )}
+                {isExpanded && !isContactAdvisor && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
@@ -381,36 +392,42 @@ const Evaluation = () => {
                   </motion.div>
                 )}
               </AnimatePresence>
-
-              {concept.status === 'remediation' && (
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200 hover:from-orange-100 hover:to-yellow-100 transition-all duration-200 shadow-sm hover:shadow-md"
+            </div>
+          </CardContent>
+        </Card>
+        {/* Continue Learning Button - Moved outside the card */}
+              {concept.status === 'intervention' && (
+          <motion.div
+            className="mt-4"
+            whileHover={{ scale: 1.02 }} 
+            whileTap={{ scale: 0.98 }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleLearnMore(concept.concept);
+                      handleContinueLearning(concept.concept);
                     }}
                   >
-                    <BookOpen className="h-4 w-4 mr-2" />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200 hover:from-orange-100 hover:to-yellow-100 transition-all duration-200 shadow-sm hover:shadow-md"
+            >
                     Continue Learning
                   </Button>
                 </motion.div>
               )}
-            </div>
-          </CardContent>
-        </Card>
       </motion.div>
     );
   };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="min-h-screen relative">
       {/* Enhanced animated background */}
       <AnimatedBackground />
       <FloatingElements />
-      <EnhancedLogout />
       <CelebrationEffect />
       
       {/* Motivational AI Tutor Tip */}
@@ -477,7 +494,7 @@ const Evaluation = () => {
         <div className="max-w-6xl mx-auto">
           {/* Enhanced Header */}
           <motion.div 
-            className="flex items-center justify-between mb-8"
+            className="flex items-center justify-between mb-3"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ scale: 1.01 }}
@@ -517,7 +534,7 @@ const Evaluation = () => {
           >
             <Card className="mb-8 bg-gradient-to-r from-cyan-50/80 via-blue-50/80 to-purple-50/80 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 backdrop-blur-sm">
               <CardHeader>
-                <div className="flex items-center gap-3 mb-2">
+                <div className="flex items-center gap-3">
                   <motion.div 
                     className="p-3 bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 rounded-xl shadow-lg"
                     animate={{ 
@@ -536,7 +553,7 @@ const Evaluation = () => {
                     <CardTitle className="text-2xl bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
                       Thank you for completing the assessment!
                     </CardTitle>
-                    <p className="text-muted-foreground text-lg">
+                    <p className="text-muted-foreground text-md">
                       Based on your performance, we've crafted your Personalized Learning Pathway.
                     </p>
                   </div>
@@ -546,15 +563,15 @@ const Evaluation = () => {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
                   {/* Overall MCQ Score */}
                   <motion.div 
-                    className="p-4 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl border border-cyan-200 backdrop-blur-sm"
+                    className="p-2 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl border border-cyan-200 backdrop-blur-sm"
                     whileHover={{ scale: 1.05, y: -2 }}
                   >
                     <div className="flex items-center justify-center mb-2">
                       <AnimatedScore 
                         score={overallMCQScore} 
-                        status={overallMCQScore >= 80 ? 'mastery' : overallMCQScore >= 60 ? 'remediation' : 'intervention'} 
+                        status={overallMCQScore >= 75 ? 'mastery' : overallMCQScore >= 50 ? 'remediation' : 'intervention'} 
                         size={50}
-                        showCelebration={overallMCQScore > 80}
+                        showCelebration={overallMCQScore > 75}
                       />
                     </div>
                     <div className="text-sm text-cyan-700 font-medium">Overall MCQ Score</div>
@@ -562,7 +579,7 @@ const Evaluation = () => {
                   </motion.div>
 
                   <motion.div 
-                    className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200 backdrop-blur-sm"
+                    className="p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200 backdrop-blur-sm"
                     whileHover={{ scale: 1.05, y: -2 }}
                   >
                     <motion.div 
@@ -577,7 +594,7 @@ const Evaluation = () => {
                     <CheckCircle className="h-5 w-5 text-green-500 mx-auto mt-2" />
                   </motion.div>
                   <motion.div 
-                    className="p-4 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl border border-orange-200 backdrop-blur-sm"
+                    className="p-3 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl border border-orange-200 backdrop-blur-sm"
                     whileHover={{ scale: 1.05, y: -2 }}
                   >
                     <motion.div 
@@ -588,11 +605,12 @@ const Evaluation = () => {
                     >
                       {remediationRequired.length}
                     </motion.div>
-                    <div className="text-sm text-orange-700 font-medium">Remediation Required</div>
+                    <div className="text-sm text-orange-700 font-medium">Needs Review</div>
                     <AlertTriangle className="h-5 w-5 text-orange-500 mx-auto mt-2" />
                   </motion.div>
+                  {/* New: Contact Advisor Count */}
                   <motion.div 
-                    className="p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl border border-red-200 backdrop-blur-sm"
+                    className="p-3 bg-gradient-to-r from-red-50 to-rose-50 rounded-xl border border-red-200 backdrop-blur-sm"
                     whileHover={{ scale: 1.05, y: -2 }}
                   >
                     <motion.div 
@@ -603,7 +621,7 @@ const Evaluation = () => {
                     >
                       {needsIntervention.length}
                     </motion.div>
-                    <div className="text-sm text-red-700 font-medium">Needs External Intervention</div>
+                    <div className="text-sm text-red-700 font-medium">Contact Advisor</div>
                     <XCircle className="h-5 w-5 text-red-500 mx-auto mt-2" />
                   </motion.div>
                 </div>
@@ -637,49 +655,16 @@ const Evaluation = () => {
               <Card className="bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 border-green-200 shadow-xl hover:shadow-2xl transition-all duration-300 backdrop-blur-sm">
                 <CardContent className="p-8 text-center">
                   <div className="mb-6">
-                    <motion.div 
-                      className="inline-flex p-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full mb-4 shadow-lg"
-                      animate={{ 
-                        rotate: [0, 10, -10, 0],
-                        scale: [1, 1.1, 1],
-                        boxShadow: [
-                          "0 10px 20px rgba(0, 0, 0, 0.1)",
-                          "0 20px 40px rgba(251, 191, 36, 0.4)",
-                          "0 10px 20px rgba(0, 0, 0, 0.1)"
-                        ]
-                      }}
-                      transition={{ 
-                        duration: 2, 
-                        repeat: Infinity, 
-                        repeatDelay: 1 
-                      }}
-                    >
-                      <Trophy className="h-8 w-8 text-white" />
-                    </motion.div>
-                    <div className="flex justify-center gap-2 mb-4">
-                      {[0, 1, 2].map((i) => (
-                        <motion.div
-                          key={i}
-                          animate={{ 
-                            scale: [1, 1.2, 1],
-                            opacity: [0.5, 1, 0.5]
-                          }}
-                          transition={{ 
-                            duration: 1.5, 
-                            repeat: Infinity,
-                            delay: i * 0.2
-                          }}
-                        >
-                          <Award className="h-6 w-6 text-yellow-500" />
-                        </motion.div>
-                      ))}
+                    <div className="relative inline-flex">
+                      <Trophy className="h-16 w-16 text-green-600" />
+                      <Sparkles className="absolute -top-2 -right-2 h-8 w-8 text-yellow-500" />
                     </div>
                   </div>
-                  <h3 className="text-3xl font-bold text-green-800 mb-3 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                    Outstanding Achievement! 🎉
+                  <h3 className="text-3xl font-bold mb-3 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                    Analysis Complete! 🎉
                   </h3>
                   <p className="text-green-700 mb-6 text-lg">
-                    You've mastered all concepts with an overall MCQ score of {overallMCQScore}%! Ready for the next level!
+                    Congratulations! You've mastered all concepts with an overall MCQ score of {overallMCQScore}%! Your analysis is complete and you're ready for the next level!
                   </p>
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button 
@@ -697,6 +682,17 @@ const Evaluation = () => {
           )}
         </div>
       </div>
+
+      {/* Optionally, show a modal/loader window if loadingConcept is set */}
+      {loadingConcept && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+          <AnimatedBackground />
+          <div className="bg-white p-8 rounded-xl shadow-2xl flex flex-col items-center">
+            <Loader2 className="h-10 w-10 text-blue-500 animate-spin mb-4" />
+            <div className="text-lg font-semibold">Generating personalized learning content...</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

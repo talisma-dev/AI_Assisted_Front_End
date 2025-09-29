@@ -1,61 +1,47 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-
-interface User {
-  student_id: string;
-  username: string;
-  password: string;
-  course_id: string;
-  module_id: string;
-  module_name: string;
-}
-
-interface Question {
-  id: string;
-  concept: string;
-  question: string;
-  options: string[];
-  correctAnswer: number;
-}
+import { getQuestionsData } from '@/api/getQuestionsData';
+import { Badge } from '@/components/ui/badge';
+import { Clock } from 'lucide-react';
 
 interface ConceptScore {
   concept: string;
   score: number;
   attempts: number;
   status: 'mastery' | 'remediation' | 'intervention';
-  label: 'Mastery' | 'Intermediate' | 'Novice';
+  label: 'Mastered' | 'Needs Review' | 'Contact Advisor';
 }
 
 interface AppState {
-  currentUser: User | null;
   conceptScores: ConceptScore[];
   assessmentAnswers: { [questionId: string]: number };
   showCongratulations: boolean;
+  assessmentQuestions: any[];
+  assessmentSource?: string;
+  microconcepts: { [concept: string]: any[] };
+  videourls: { [concept: string]: any[] };
 }
 
 interface AppContextType {
   state: AppState;
-  login: (username: string, password: string) => boolean;
-  logout: () => void;
   submitAssessment: (answers: { [questionId: string]: number }, conceptFilter?: string) => void;
   updateConceptAttempts: (concept: string) => void;
   showCongratulations: boolean;
   setShowCongratulations: (show: boolean) => void;
+  setAssessmentQuestions: (questions: any[]) => void;
+  setAssessmentSource?: (source: string) => void;
+  resetAllConceptAttempts: () => void;
+  setMicroconcepts: (concept: string, microconcepts: any[]) => void;
+  setVideourls: (concept: string, videourls: any[]) => void;
+  setConceptScores: (scores: ConceptScore[]) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const validUsers: User[] = [
-  { student_id: "S001", username: "Ankul", password: "Ankul123", course_id: "C202", module_id: "M101", module_name: "Algorithm" },
-  { student_id: "S002", username: "Riya", password: "Riya123", course_id: "C202", module_id: "M101", module_name: "Algorithm" },
-  { student_id: "S003", username: "Donson", password: "Donson123", course_id: "C202", module_id: "M101", module_name: "Algorithm" },
-];
-
 const outcomes = [
-  "Bayesian Inference",
-  "Feature Selection & Dimensionality Reduction", 
-  "Linear & Non-Linear Models",
-  "Gaussian distributions and decision boundaries"
+  "Storage Practices",
+  "Medication Ordering and Transcription",
+  "Dispensing and High-Alert Medications",
+  "Dosage and IV Infusion Calculations",
 ];
 
 const initialConceptScores: ConceptScore[] = outcomes.map(concept => ({
@@ -63,71 +49,69 @@ const initialConceptScores: ConceptScore[] = outcomes.map(concept => ({
   score: 0,
   attempts: 0,
   status: 'intervention',
-  label: 'Novice'
+  label: 'Contact Advisor'
 }));
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, setState] = useState<AppState>({
-    currentUser: null,
     conceptScores: initialConceptScores,
     assessmentAnswers: {},
-    showCongratulations: false
+    showCongratulations: false,
+    assessmentQuestions: [],
+    assessmentSource: undefined,
+    microconcepts: {},
+    videourls: {},
   });
 
-  const login = (username: string, password: string): boolean => {
-    const user = validUsers.find(u => u.username === username && u.password === password);
-    if (user) {
-      setState(prev => ({ ...prev, currentUser: user }));
-      return true;
+  const calculateRubric = (score: number, engagement: string, performance: string): { status: ConceptScore['status'], label: ConceptScore['label'] } => {
+    if (score >= 75) {
+      return { status: 'mastery', label: 'Mastered' };
+    } else {
+      return { status: 'remediation', label: 'Needs Review' };
     }
-    return false;
   };
 
-  const logout = () => {
-    setState(prev => ({ 
-      ...prev, 
-      currentUser: null,
-      conceptScores: initialConceptScores,
-      assessmentAnswers: {},
-      showCongratulations: false
-    }));
-  };
-
-  const calculateRubric = (score: number): { status: ConceptScore['status'], label: ConceptScore['label'] } => {
-    if (score > 80) return { status: 'mastery', label: 'Mastery' };
-    if (score > 50) return { status: 'remediation', label: 'Intermediate' };
-    return { status: 'intervention', label: 'Novice' };
-  };
-
-  const submitAssessment = (answers: { [questionId: string]: number }, conceptFilter?: string) => {
+  const submitAssessment = async (answers: { [questionId: string]: number }, conceptFilter?: string) => {
     setState(prev => {
       const newConceptScores = [...prev.conceptScores];
-      
+
       // Calculate scores for each concept
       outcomes.forEach(concept => {
+        // Skip if we're doing a single concept assessment and this isn't the target concept
         if (conceptFilter && concept !== conceptFilter) return;
-        
-        const conceptQuestions = Object.keys(answers).filter(qId => 
-          qId.startsWith(concept.replace(/\s+/g, '').substring(0, 3))
-        );
-        
+
+        // Get all questions for this concept from the current assessment
+        const conceptQuestions = prev.assessmentQuestions.filter(q => q.concept === concept);
+
         if (conceptQuestions.length === 0) return;
-        
-        const correctAnswers = conceptQuestions.filter(qId => {
-          // Simplified correct answer logic - in real app, this would reference actual questions
-          return Math.random() > 0.3; // Simulate 70% chance of correct answer
+
+        // Calculate correct answers for this concept
+        const correctAnswers = conceptQuestions.filter(q => {
+          const userAnswerIndex = answers[q.question_id];
+          if (userAnswerIndex === undefined) return false;
+          const userAnswer = q.options[userAnswerIndex];
+          return userAnswer === q.answer;
         }).length;
-        
+
         const score = Math.round((correctAnswers / conceptQuestions.length) * 100);
-        const rubric = calculateRubric(score);
-        
+
+        // Use default engagement/performance values
+        const engagement = 'High';
+        const performance = 'Low';
+
+        // Calculate status based on score, engagement, and performance
+        const rubric = calculateRubric(score, engagement, performance);
+
+        // Find the concept in the scores array
         const conceptIndex = newConceptScores.findIndex(cs => cs.concept === concept);
         if (conceptIndex !== -1) {
+          // Update the concept score and status
           newConceptScores[conceptIndex] = {
             ...newConceptScores[conceptIndex],
-            score,
+            score, // Use the calculated score directly
+            attempts: conceptFilter ? newConceptScores[conceptIndex].attempts + 1 : newConceptScores[conceptIndex].attempts,
             ...rubric
-          };
+          } as ConceptScore;
         }
       });
 
@@ -143,21 +127,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setState(prev => {
       const newConceptScores = [...prev.conceptScores];
       const conceptIndex = newConceptScores.findIndex(cs => cs.concept === concept);
-      
+
       if (conceptIndex !== -1) {
         const currentAttempts = newConceptScores[conceptIndex].attempts + 1;
         newConceptScores[conceptIndex] = {
           ...newConceptScores[conceptIndex],
           attempts: currentAttempts
         };
-        
+
         // If 3 attempts and still not mastery, move to intervention
         if (currentAttempts >= 3 && newConceptScores[conceptIndex].status === 'remediation') {
           newConceptScores[conceptIndex].status = 'intervention';
-          newConceptScores[conceptIndex].label = 'Novice';
+          newConceptScores[conceptIndex].label = 'Contact Advisor';
         }
       }
-      
+
       return { ...prev, conceptScores: newConceptScores };
     });
   };
@@ -166,15 +150,55 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setState(prev => ({ ...prev, showCongratulations: show }));
   };
 
+  const setAssessmentQuestions = (questions: any[]) => {
+    setState(prev => ({ ...prev, assessmentQuestions: questions }));
+  };
+
+  const setAssessmentSource = (source: string) => {
+    setState(prev => ({ ...prev, assessmentSource: source }));
+  };
+
+  const resetAllConceptAttempts = () => {
+    setState(prev => ({
+      ...prev,
+      conceptScores: prev.conceptScores.map(cs => ({ ...cs, attempts: 0 }))
+    }));
+  };
+
+  const setMicroconcepts = (concept: string, microconcepts: any[]) => {
+    setState(prev => ({
+      ...prev,
+      microconcepts: { ...prev.microconcepts, [concept]: microconcepts }
+    }));
+  };
+
+  const setVideourls = (concept: string, videourls: any[]) => {
+    setState(prev => ({
+      ...prev,
+      videourls: { ...prev.videourls, [concept]: videourls }
+    }));
+  };
+
+  const setConceptScores = (scores: ConceptScore[]) => {
+    setState(prev => ({
+      ...prev,
+      conceptScores: scores
+    }));
+  };
+
   return (
     <AppContext.Provider value={{
       state,
-      login,
-      logout,
       submitAssessment,
       updateConceptAttempts,
       showCongratulations: state.showCongratulations,
-      setShowCongratulations
+      setShowCongratulations,
+      setAssessmentQuestions,
+      setAssessmentSource,
+      resetAllConceptAttempts,
+      setMicroconcepts,
+      setVideourls,
+      setConceptScores,
     }}>
       {children}
     </AppContext.Provider>

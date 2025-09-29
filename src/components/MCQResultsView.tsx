@@ -55,7 +55,7 @@ const MCQResultsView: React.FC<MCQResultsViewProps> = ({ results, conceptName })
                 <motion.div
                   className={`text-4xl font-bold ${
                     percentage >= 80 ? 'text-green-600' : 
-                    percentage >= 60 ? 'text-orange-600' : 'text-red-600'
+                    percentage >= 50 ? 'text-orange-600' : 'text-red-600'
                   }`}
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, AlertTriangle, XCircle, List } from 'lucide-react';
@@ -40,13 +39,6 @@ const RubricFilterTabs: React.FC<RubricFilterTabsProps> = ({
       icon: AlertTriangle,
       color: 'orange',
       count: counts.remediation
-    },
-    {
-      id: 'intervention',
-      label: 'Need Help',
-      icon: XCircle,
-      color: 'red',
-      count: counts.intervention
     }
   ];
 
@@ -89,21 +81,28 @@ const RubricFilterTabs: React.FC<RubricFilterTabsProps> = ({
                 whileTap={{ scale: 0.98 }}
                 layout
               >
-                <Icon className="h-4 w-4" />
-                <span>{tab.label}</span>
-                <motion.span
-                  className={`px-2 py-1 text-xs rounded-full ${
-                    isActive ? 'bg-white/80' : 'bg-gray-100'
-                  }`}
-                  animate={{ scale: isActive ? 1.1 : 1 }}
-                >
-                  {tab.count}
-                </motion.span>
+                <span className="relative z-10 flex items-center gap-2">
+                  <Icon className="h-4 w-4" />
+                  <span>{tab.label}</span>
+                  <motion.span
+                    className={`px-2 py-1 text-xs rounded-full ${
+                      isActive ? 'bg-white/80' : 'bg-gray-100'
+                    }`}
+                    animate={{ scale: isActive ? 1.1 : 1 }}
+                  >
+                    {tab.count}
+                  </motion.span>
+                </span>
                 
                 {isActive && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute inset-0 bg-current opacity-10 rounded-lg"
+                    className={`absolute inset-0 rounded-lg z-0 pointer-events-none
+                      ${tab.color === 'blue' ? 'bg-blue-200/40' : ''}
+                      ${tab.color === 'green' ? 'bg-green-200/40' : ''}
+                      ${tab.color === 'orange' ? 'bg-orange-200/40' : ''}
+                      ${tab.color === 'red' ? 'bg-red-200/40' : ''}
+                    `}
                     initial={false}
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
