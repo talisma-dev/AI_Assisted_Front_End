@@ -20,11 +20,8 @@ const queryClient = new QueryClient();
 const base = import.meta.env.BASE_URL; // 🧠 reads "/AiAssistedLearning/" from vite.config.js
 
 const AppContent = () => {
-  const location = useLocation();
-  const isLearningPage = location.pathname.startsWith("/learning");
   return (
     <div className="min-h-screen " style={{ backgroundColor: "transparent" }}>
-      {/* {!isLearningPage && <AnimatedBackground />} */}
       <Routes>
         <Route path="/lms" element={<BlackboardLoading />} />
         <Route path="/direct" element={<DirectLinkLoading />} />
