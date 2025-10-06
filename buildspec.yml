@@ -26,5 +26,5 @@ phases:
       - echo Listing S3 bucket files after sync...
       - aws s3 ls s3://talisma-assisted-learning --recursive
       - echo Invalidation of CloudFront distribution...
-      - aws cloudfront create-invalidation --distribution-id aws cloudfront create-invalidation --distribution-id EB0BE9NL1XAN8 --paths "/*"
+      - aws cloudfront create-invalidation --distribution-id EB0BE9NL1XAN8 --paths "/*"
       - echo Invalidation request submitted
