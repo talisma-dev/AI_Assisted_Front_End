@@ -9,7 +9,6 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8081,
   },
-  base: '/nursing-programme',
   plugins: [
     react(),
     mode === 'development' &&
