@@ -4,12 +4,14 @@ import { setToken } from '@/lib/auth';
 import { generateJWTToken } from '@/api/auth';
 import { useApp } from '@/contexts/AppContext';
 import { Loader2 } from 'lucide-react';
+import { getEvaluateAssessmentScores } from '@/api/getEvaluateAssessmentScores';
 
 const DirectLinkLoadingPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { setAssessmentQuestions } = useApp();
   const [error, setError] = useState<string | null>(null);
+  const {setConceptScores} = useApp();
 
   useEffect(() => {
     const initializeDirectLinkUser = async () => {
@@ -19,7 +21,16 @@ const DirectLinkLoadingPage: React.FC = () => {
         if (!studentGuid || !courseGuid) throw new Error('Missing student_guid or course_guid');
 
         // Use token from URL if present; otherwise mint it using backend
-        const tokenFromUrl = searchParams.get('token');
+        // const tokenFromUrl = searchParams.get('token');
+        // let token = tokenFromUrl;
+        // if (tokenFromUrl) {
+        //   setToken(tokenFromUrl);
+        // } else {
+        //   token = await generateJWTToken(studentGuid, courseGuid);
+        //   if (!token) throw new Error('Token generation failed');
+        //   setToken(token);
+        // }
+         const tokenFromUrl = searchParams.get('token');
         if (tokenFromUrl) {
           setToken(tokenFromUrl);
         } else {
@@ -28,9 +39,47 @@ const DirectLinkLoadingPage: React.FC = () => {
           setToken(token);
         }
 
+        // Checking already first assessment taken
+        const evalScores = await getEvaluateAssessmentScores();
+        if(evalScores && Array.isArray(evalScores.evaluationData) && evalScores.evaluationData.length > 0) {
+          // User has already taken the assessment
+            const mappedScores = evalScores.evaluationData.map(item => {
+                  const rawLevel = (item.level ?? '').toString().trim();
+                  const normalizedLevel = rawLevel.replace(/^["']|["']$/g, '').replace(/_/g, ' ');
+                  const levelLower = normalizedLevel.toLowerCase();
+                  let status: 'mastery' | 'remediation' | 'intervention';
+                  let label: 'Mastered' | 'Needs Review' | 'Contact Advisor';
+                  if (levelLower === 'mastered') {
+                    status = 'mastery';
+                    label = 'Mastered';
+                  } else if (levelLower === 'intermediate') {
+                    status = 'remediation';
+                    label = 'Needs Review';
+                  } else if (levelLower === 'novice' || levelLower === 'contact advisor') {
+                    status = 'intervention';
+                    label = 'Contact Advisor';
+                  } else {
+                    // Default fallback
+                    status = 'intervention';
+                    label = 'Contact Advisor';
+                  }
+                  const numericScore = typeof item.score === 'string' ? Number(item.score) : item.score;
+              return {
+                concept: item.concept,
+                score: Number.isFinite(numericScore) ? (numericScore as number) : 0,
+                attempts: item.attemptCount ?? 0,
+                status,
+                label,
+              };
+          });
+          setConceptScores(mappedScores);
+          navigate('/evaluation');
+        }
+        else{ 
         // Do not prefetch assessment here to avoid duplicate generate calls
-        setAssessmentQuestions([]);
-        navigate('/assessment');
+          setAssessmentQuestions([]);
+          navigate('/assessment');
+        }
       } catch (err) {
         console.error('Error initializing Direct Link user:', err);
         setError(err instanceof Error ? err.message : 'Failed to initialize user session');
