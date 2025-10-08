@@ -74,13 +74,12 @@ export async function generateCourseContent(conceptName: string): Promise<Genera
     };
   }
 
-  const res = await apiFetch('/api/utility/generateCourseContent', {
-    method: 'POST',
+  const res = await apiFetch(`/api/utility/generateCourseContent?conceptName=${encodeURIComponent(conceptName)}`, {
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     },
-    body: JSON.stringify({ conceptName })
   });
   const data = await res.json();
   const payload = (data && typeof data === 'object' && 'data' in data) ? (data as any).data : data;
