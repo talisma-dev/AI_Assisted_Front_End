@@ -72,7 +72,7 @@ export async function getQuestionsData(params: {
       return mapped;
     } catch (error) {
       console.error('Error in getQuestionsData:', error);
-      return generateSampleQuestions(params.outcomes, params.num_questions);
+      throw error;
     }
   }
 
