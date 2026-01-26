@@ -90,3 +90,23 @@ export async function getAssessmentData(concepts: string[] = []) {
     throw error;
   }
 }
+
+export async function generateAccessTokenbySSO(ssoToken: string) {
+  try {
+    const response = await apiFetch("/api/auth/validateSSOToken", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({
+        verificationCode: ssoToken
+      }),
+    });
+    const data = await response.json();
+    return data;  
+  } catch (error) {
+    console.error("Error in generateAccessTokenbySSO:", error);
+    throw error;
+  }
+}

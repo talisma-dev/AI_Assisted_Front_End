@@ -15,6 +15,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 import Microconcept from './pages/Microconcept';
 import BlackboardLoading from './pages/BlackboardLoading';
 import DirectLinkLoading from './pages/DirectLinkLoading';
+import SSOLoading from './pages/SSOLoading';
 
 const queryClient = new QueryClient();
 const base = import.meta.env.BASE_URL; // 🧠 reads "/AiAssistedLearning/" from vite.config.js
@@ -25,6 +26,7 @@ const AppContent = () => {
       <Routes>
         <Route path="/lms" element={<BlackboardLoading />} />
         <Route path="/direct" element={<DirectLinkLoading />} />
+        <Route path="/sso" element={<SSOLoading />} />
         <Route path="/assessment" element={<Assessment />} />
         <Route path="/assessment/:concept" element={<Assessment />} />
         <Route path="/evaluation" element={<Evaluation />} />
