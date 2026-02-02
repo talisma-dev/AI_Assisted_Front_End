@@ -14,9 +14,10 @@ import CelebrationEffect from "@/components/CelebrationEffect";
 import { ArrowLeft, BookOpen, CheckCircle, AlertTriangle, XCircle, Trophy, Target, TrendingUp, Award, Brain, Sparkles, Clock, BarChart, Eye, EyeOff, Repeat, Loader2 } from "lucide-react";
 import { generateContent } from '@/api/generateContent';
 import { updateAssessmentDetails } from '@/api/updateAssessmentDetails';
+import { getEvaluateAssessmentScores } from '@/api/getEvaluateAssessmentScores';
 
 const Evaluation = () => {
-  const { state, setShowCongratulations } = useApp();
+  const { state, setShowCongratulations, setConceptScores } = useApp();
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState<'all' | 'mastery' | 'remediation' | 'intervention'>('all');
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
@@ -178,7 +179,7 @@ const Evaluation = () => {
         
         <Card 
           className={`relative bg-gradient-to-r ${getStatusColor(concept.status)} border shadow-lg hover:shadow-2xl transition-all duration-500 ${isContactAdvisor ? 'cursor-pointer' : 'cursor-default'} overflow-hidden backdrop-blur-sm`}
-          onClick={isContactAdvisor ? () => setExpandedCard(isExpanded ? null : concept.concept) : undefined}
+          // onClick={isContactAdvisor ? () => setExpandedCard(isExpanded ? null : concept.concept) : undefined}
         >
           <motion.div
             className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0"
@@ -421,6 +422,51 @@ const Evaluation = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
+
+    const fetchEvaluationScores = async () => {
+      try {
+        const evalScores = await getEvaluateAssessmentScores();
+        if (evalScores && Array.isArray(evalScores.evaluationData) && evalScores.evaluationData.length > 0) {
+          const mappedScores = evalScores.evaluationData.map(item => {
+            const rawLevel = (item.level ?? '').toString().trim();
+            const normalizedLevel = rawLevel.replace(/^['"]|['"]$/g, '').replace(/_/g, ' ');
+            const levelLower = normalizedLevel.toLowerCase();
+            let status: 'mastery' | 'remediation' | 'intervention';
+            let label: 'Mastered' | 'Needs Review' | 'Contact Advisor';
+            if (levelLower === 'mastered') {
+              status = 'mastery';
+              label = 'Mastered';
+            } else if (levelLower === 'intermediate') {
+              status = 'remediation';
+              label = 'Needs Review';
+            } else if (levelLower === 'novice' || levelLower === 'contact advisor') {
+              status = 'intervention';
+              label = 'Contact Advisor';
+            } else {
+              status = 'intervention';
+              label = 'Contact Advisor';
+            }
+            const numericScore = typeof item.score === 'string' ? Number(item.score) : item.score;
+            return {
+              concept: item.concept,
+              score: Number.isFinite(numericScore) ? (numericScore as number) : 0,
+              attempts: item.attemptCount ?? 0,
+              status,
+              label,
+            };
+          });
+          setConceptScores(mappedScores);
+        }
+      } catch (error) {
+        console.error('Error fetching evaluation scores:', error);
+      } 
+    };
+    if(state.conceptScores.length === 0){
+        fetchEvaluationScores();
+    }
   }, []);
 
   return (
