@@ -14,7 +14,7 @@ import CelebrationEffect from "@/components/CelebrationEffect";
 import { ArrowLeft, BookOpen, CheckCircle, AlertTriangle, XCircle, Trophy, Target, TrendingUp, Award, Brain, Sparkles, Clock, BarChart, Eye, EyeOff, Repeat, Loader2 } from "lucide-react";
 import { generateContent } from '@/api/generateContent';
 import { updateAssessmentDetails } from '@/api/updateAssessmentDetails';
-import { getEvaluateAssessmentScores } from '@/api/getEvaluateAssessmentScores';
+import { getConfiguredEvaluatedAssessmentScores } from '@/api/getConfiguredEvaluatedAssessmentScores';
 
 const Evaluation = () => {
   const { state, setShowCongratulations, setConceptScores } = useApp();
@@ -428,7 +428,7 @@ const Evaluation = () => {
 
     const fetchEvaluationScores = async () => {
       try {
-        const evalScores = await getEvaluateAssessmentScores();
+        const evalScores = await getConfiguredEvaluatedAssessmentScores();
         if (evalScores && Array.isArray(evalScores.evaluationData) && evalScores.evaluationData.length > 0) {
           const mappedScores = evalScores.evaluationData.map(item => {
             const rawLevel = (item.level ?? '').toString().trim();
