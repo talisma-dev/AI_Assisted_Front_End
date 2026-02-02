@@ -37,12 +37,7 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const outcomes = [
-  "Storage Practices",
-  "Medication Ordering and Transcription",
-  "Dispensing and High-Alert Medications",
-  "Dosage and IV Infusion Calculations",
-];
+const outcomes = [];
 
 const initialConceptScores: ConceptScore[] = outcomes.map(concept => ({
   concept,
