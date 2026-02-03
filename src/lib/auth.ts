@@ -1,6 +1,6 @@
 // JWT Token Management Utilities
 export const setToken = (token: string): void => {
-  document.cookie = `jwt_token=${token}; path=/; secure; samesite=strict; max-age=86400`;
+  document.cookie = `jwt_token=${token}; path=/; secure; samesite=none; max-age=86400`;
 };
 
 export const getToken = (): string | null => {
