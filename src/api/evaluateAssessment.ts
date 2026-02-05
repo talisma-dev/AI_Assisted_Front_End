@@ -7,6 +7,7 @@ export interface EvaluationItem {
   score: number | string;
   level: 'Mastered' | 'Intermediate' | '"Contact_Advisor"' | string;
   attemptCount: number;
+  isRemediationCompleted : boolean;
 }
 
 export interface EvaluateResponse {
