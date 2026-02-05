@@ -397,7 +397,7 @@ const Evaluation = () => {
           </CardContent>
         </Card>
         {/* Continue Learning Button - Moved outside the card */}
-              {concept.status === 'intervention' && (
+              {concept.status === 'intervention' && !concept.isRemediationCompleted && (
           <motion.div
             className="mt-4"
             whileHover={{ scale: 1.02 }} 
@@ -456,6 +456,7 @@ const Evaluation = () => {
               attempts: item.attemptCount ?? 0,
               status,
               label,
+              isRemediationCompleted : item.isRemediationCompleted ?? false
             };
           });
           setConceptScores(mappedScores);

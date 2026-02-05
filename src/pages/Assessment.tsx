@@ -96,6 +96,7 @@ const Assessment = () => {
           attempts: item.attemptCount ?? 0,
           status,
           label,
+          isRemediationCompleted : item.isRemediationCompleted ?? false
         };
       });
 
