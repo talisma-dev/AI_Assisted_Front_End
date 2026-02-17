@@ -130,7 +130,7 @@ const Evaluation = () => {
       case 'remediation':
         return 'Needs Review';
       case 'intervention':
-        return 'Contact Advisor';
+        return 'Learn and Improve';
       default:
         return 'Unknown';
     }
@@ -435,13 +435,16 @@ const Evaluation = () => {
             const normalizedLevel = rawLevel.replace(/^['"]|['"]$/g, '').replace(/_/g, ' ');
             const levelLower = normalizedLevel.toLowerCase();
             let status: 'mastery' | 'remediation' | 'intervention';
-            let label: 'Mastered' | 'Needs Review' | 'Contact Advisor';
+            let label: 'Mastered' | 'Needs Review' | 'Contact Advisor' | 'Learn and Improve';
             if (levelLower === 'mastered') {
               status = 'mastery';
               label = 'Mastered';
             } else if (levelLower === 'intermediate') {
               status = 'remediation';
               label = 'Needs Review';
+            } else if (levelLower === 'need intervention') {
+              status = 'intervention';
+              label = 'Learn and Improve';
             } else if (levelLower === 'novice' || levelLower === 'contact advisor') {
               status = 'intervention';
               label = 'Contact Advisor';
@@ -546,7 +549,7 @@ const Evaluation = () => {
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ scale: 1.01 }}
           >
-            <motion.div whileHover={{ x: -5 }}>
+            {/* <motion.div whileHover={{ x: -5 }}>
               <Button 
                 onClick={() => navigate("/module")}
                 className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 hover:from-cyan-600 hover:via-blue-600 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 px-6 py-3"
@@ -554,7 +557,7 @@ const Evaluation = () => {
                 <ArrowLeft className="h-4 w-4" />
                 Back to Module
               </Button>
-            </motion.div>
+            </motion.div> */}
             <motion.div 
               className="text-right"
               animate={{
@@ -668,7 +671,7 @@ const Evaluation = () => {
                     >
                       {needsIntervention.length}
                     </motion.div>
-                    <div className="text-sm text-red-700 font-medium">Contact Advisor</div>
+                    <div className="text-sm text-red-700 font-medium">Learn and Improve</div>
                     <XCircle className="h-5 w-5 text-red-500 mx-auto mt-2" />
                   </motion.div>
                 </div>

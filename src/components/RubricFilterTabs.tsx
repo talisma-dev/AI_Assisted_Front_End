@@ -39,6 +39,13 @@ const RubricFilterTabs: React.FC<RubricFilterTabsProps> = ({
       icon: AlertTriangle,
       color: 'orange',
       count: counts.remediation
+    },
+    {
+      id: 'intervention',
+      label: 'Learn and Improve',
+      icon: XCircle,
+      color: 'red',
+      count: counts.remediation
     }
   ];
 
