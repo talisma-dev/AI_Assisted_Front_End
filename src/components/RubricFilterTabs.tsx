@@ -21,7 +21,7 @@ const RubricFilterTabs: React.FC<RubricFilterTabsProps> = ({
   const tabs = [
     {
       id: 'all',
-      label: 'All Concepts',
+      label: 'All Learning Goals',
       icon: List,
       color: 'blue',
       count: counts.all
