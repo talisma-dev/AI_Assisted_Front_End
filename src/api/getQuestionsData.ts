@@ -52,15 +52,18 @@ export async function getQuestionsData(params: {
         body: JSON.stringify(requestBody)
       });
 
-      const data = await response.json();
+      const apiResponse = await response.json();
+      const questionsArray = apiResponse?.data?.data;
+      const config = apiResponse?.data?.configuration;
+      const courseData = apiResponse?.data?.courseName || apiResponse?.data?.course_name; // Check for course name in API response
 
       // Expecting { data: [ { question_id, concept, question, options } ] }
-      if (!data || !Array.isArray(data.data)) {
-        console.error('Invalid API Response:', data);
+      if (!Array.isArray(questionsArray)) {
+        console.error('Invalid API Response:', apiResponse);
         throw new Error('Invalid response format from API');
       }
 
-      const mapped = data.data.map((q: any) => ({
+      const mapped = questionsArray.map((q: any) => ({
         question_id: q.question_id,
         question_type: 'MCQ',
         concept: q.concept,
@@ -69,7 +72,7 @@ export async function getQuestionsData(params: {
         answer: q.options?.[0] ?? ''
       }));
 
-      return mapped;
+      return { questions: mapped, configuration: config, courseName: courseData };
     } catch (error) {
       console.error('Error in getQuestionsData:', error);
       throw error;

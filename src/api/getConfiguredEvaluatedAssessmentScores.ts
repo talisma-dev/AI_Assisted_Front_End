@@ -18,7 +18,7 @@ export async function getConfiguredEvaluatedAssessmentScores(token: string | nul
      });
 
      const data = await res.json();
-     const payload: EvaluateResponse = { evaluationData : (data && typeof data === 'object' && 'data' in data) ? (data as any).data : data };
+     const payload: EvaluateResponse = { evaluationData : (data && typeof data === 'object' && 'data' in data) ? (data as any).data : data,maxRemediationConfigCount: (data && typeof data === 'object' && 'maxRemediationConfigCount' in data) ? (data as any).maxRemediationConfigCount : null};
      if(payload && Array.isArray(payload.evaluationData) && payload.evaluationData.length > 0) {
         return payload;
      }
