@@ -26,6 +26,7 @@ const Evaluation = () => {
   const [loadingConcept, setLoadingConcept] = useState<string | null>(null);
   const [hasCalledAPI, setHasCalledAPI] = useState(false);
   const [maxRemediationCount, setMaxRemediationCount] = useState<number>(0);
+  const [courseName, setCourseName] = useState<string>('');
 
   const getDisplayLabel = (label: string) => {
     if (label === 'Contact Advisor') return 'Novice';
@@ -443,6 +444,12 @@ const Evaluation = () => {
   }, []);
 
   useEffect(() => {
+    if (courseName) {
+      document.title = `${courseName} - AI Assisted Learning Programme`;
+    }
+  }, [courseName]);
+
+  useEffect(() => {
 
     const fetchEvaluationScores = async () => {
       try {
@@ -450,6 +457,10 @@ const Evaluation = () => {
         if (evalScores && Array.isArray(evalScores.evaluationData) && evalScores.evaluationData.length > 0) {
           if (evalScores.maxRemediationConfigCount !== undefined && evalScores.maxRemediationConfigCount !== null) {
             setMaxRemediationCount(evalScores.maxRemediationConfigCount);
+          }
+          
+          if (evalScores.courseName) {
+            setCourseName(evalScores.courseName);
           }
           
           const mappedScores = evalScores.evaluationData.map(item => {

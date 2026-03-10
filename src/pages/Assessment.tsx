@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { getQuestionsData } from "@/api/getQuestionsData";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import { evaluateAssessment } from "@/api/evaluateAssessment";
+import { getConfiguredEvaluatedAssessmentScores } from "@/api/getConfiguredEvaluatedAssessmentScores";
 
 interface Question {
   question_id: string;
@@ -329,6 +330,26 @@ const Assessment = () => {
       stopTimer();
     };
   }, []);
+  useEffect(() => {
+    const fetchCourseName = async () => {
+      try {
+        const evalScores = await getConfiguredEvaluatedAssessmentScores();
+        if (evalScores?.courseName) {
+          setCourseNameFromApi(evalScores.courseName);
+        }
+      } catch (error) {
+        console.error('Error fetching course name:', error);
+      }
+    };
+
+    fetchCourseName();
+  }, []);
+
+  useEffect(() => {
+    if (courseNameFromApi) {
+      document.title = `${courseNameFromApi} - AI Assisted Learning Programme`;
+    }
+  }, [courseNameFromApi]);
 
   if (isLoading) {
     return (
