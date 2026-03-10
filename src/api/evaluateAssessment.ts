@@ -13,6 +13,7 @@ export interface EvaluationItem {
 export interface EvaluateResponse {
   evaluationData: EvaluationItem[];
   maxRemediationConfigCount?: number | null;
+  courseName?: string;
 }
 
 export async function evaluateAssessment(answersByQuestionId: EvaluatePayload, conceptName: string | null = null): Promise<EvaluateResponse> {
