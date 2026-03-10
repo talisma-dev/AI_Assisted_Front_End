@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useApp } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Clock, BookOpen, Brain, Zap, Sparkles, Loader2 } from "lucide-react";
+import { ArrowLeft, Clock, BookOpen, Brain, Zap, Sparkles, Loader2, CheckCircle, Check, Timer, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { getQuestionsData } from "@/api/getQuestionsData";
 import AnimatedBackground from "@/components/AnimatedBackground";
@@ -28,6 +28,7 @@ const Assessment = () => {
   const conceptFromState = (location.state as any)?.conceptName as string | undefined;
   const { state, submitAssessment, updateConceptAttempts, setAssessmentQuestions, setConceptScores } = useApp();
   const navigate = useNavigate();
+  const [courseNameFromApi, setCourseNameFromApi] = useState<string | null>(null);
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<{ [questionId: string]: string }>({});
@@ -38,13 +39,78 @@ const Assessment = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hasFetchedQuestions, setHasFetchedQuestions] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(conceptFromState ? false : true);
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [assessmentConfig, setAssessmentConfig] = useState<any>(null);
+  const [timeRemaining, setTimeRemaining] = useState<number>(0);
+  const [timerStarted, setTimerStarted] = useState(false);
+  const [timeExpired, setTimeExpired] = useState(false);
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleAnswerChange = (questionId: string, value: string) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
   };
 
-  const handleSubmit = async () => {
-    if (Object.keys(answers).length !== questions.length) {
+  // Timer functionality
+  const startTimer = () => {
+    if (assessmentConfig?.isTimed && !timerStarted) {
+      setTimerStarted(true);
+      setTimeRemaining(assessmentConfig.durationInMinutes * 60);
+    }
+  };
+
+  // Calculate if 70% of time has passed
+  const isSeventyPercentPassed = assessmentConfig?.isTimed && 
+    timerStarted && 
+    timeRemaining > 0 && 
+    timeRemaining <= (assessmentConfig.durationInMinutes * 60 * 0.3);
+
+  const stopTimer = () => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Timer effect
+  useEffect(() => {
+    if (timerStarted && timeRemaining >= 0) {
+      timerIntervalRef.current = setInterval(() => {
+        setTimeRemaining(prev => {
+          if (prev <= 0) {
+            setTimeExpired(true);
+            stopTimer();
+            toast.success("Maximum time reached! Your assessment has been submitted successfully.", {
+              duration: 2000,
+              position: 'top-center'
+            });
+            handleSubmit(true); 
+            return 0;
+          }
+          if (prev === 300) {
+            toast.warning("Only 5 minutes remaining!");
+          }
+          if (prev === 60) {
+            toast.error("Only 1 minute remaining!");
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      stopTimer();
+    }
+    return () => stopTimer();
+  }, [timerStarted, timeRemaining]);
+
+  const handleSubmit = async (isTimeExpired = false) => {
+    stopTimer();
+    if (Object.keys(answers).length !== questions.length && !isTimeExpired) {
       toast.error("Please answer all questions before submitting.");
       return;
     }
@@ -141,6 +207,9 @@ const Assessment = () => {
 
   useEffect(() => {
     let isMounted = true;
+    if (conceptFromState && !showConfirmation) {
+      startTimer();
+    }
 
     async function fetchQuestions() {
       // If questions are already set in context, use them regardless of source
@@ -182,21 +251,38 @@ const Assessment = () => {
           };
         }
         console.log('Fetching questions with params:', params);
-        const fetchedQuestions = await getQuestionsData(params);
-        console.log('Received questions:', fetchedQuestions);
+        const fetchedQuestionsResponse = await getQuestionsData(params);
+        console.log('Received questions:', fetchedQuestionsResponse);
 
         if (!isMounted) return;
 
-        if (!fetchedQuestions) {
+        if (!fetchedQuestionsResponse) {
           throw new Error("No response from the API");
         }
 
-        if (!Array.isArray(fetchedQuestions)) {
+        // Handle both old format (direct array) and new format (object with questions and config)
+        let fetchedQuestions, config, courseName;
+        if (Array.isArray(fetchedQuestionsResponse)) {
+          fetchedQuestions = fetchedQuestionsResponse;
+          config = null;
+          courseName = null;
+        } else if (fetchedQuestionsResponse.questions && Array.isArray(fetchedQuestionsResponse.questions)) {
+          fetchedQuestions = fetchedQuestionsResponse.questions;
+          config = fetchedQuestionsResponse.configuration;
+          courseName = fetchedQuestionsResponse.courseName;
+        } else {
           throw new Error("Invalid response format from API");
         }
 
         if (fetchedQuestions.length === 0) {
           throw new Error("No questions received from the API");
+        }
+        // Set assessment configuration from API
+        if (config) {
+          setAssessmentConfig(config);
+        }
+        if (courseName) {
+          setCourseNameFromApi(courseName);
         }
 
         // Validate question format
@@ -237,6 +323,12 @@ const Assessment = () => {
       isMounted = false;
     };
   }, [state.assessmentSource, concept, setAssessmentQuestions, hasFetchedQuestions, state.assessmentQuestions]);
+
+  useEffect(() => {
+    return () => {
+      stopTimer();
+    };
+  }, []);
 
   if (isLoading) {
     return (
@@ -336,6 +428,98 @@ const Assessment = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
+      {/* Confirmation Popup */}
+      {showConfirmation && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50 backdrop-blur-sm">
+          <AnimatedBackground />
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 relative z-10 border border-gray-200">
+            <div className="p-8">
+              <div className="flex items-center justify-center mb-6">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                  <Brain className="h-8 w-8 text-white" />
+                </div>
+              </div>
+              
+              <h2 className="text-2xl font-bold text-center mb-6 bg-gradient-to-r from-gray-800 to-gray-900 bg-clip-text text-transparent">
+                Before You Begin
+              </h2>
+              
+              <div className="space-y-4 mb-8">
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    This Assessment evaluates your understanding of all <strong>Learning Objectives</strong> in this Unit.
+                  </p>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    Complete the assessment within <strong>{assessmentConfig?.durationInMinutes || 0} minutes</strong>
+                  </p>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    A score of <strong>{assessmentConfig?.masteryThreshold || 0}%</strong> or higher is required to achieve Mastery
+                  </p>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    If mastery is not achieved, <strong>Remediation</strong> content will be assigned
+                  </p>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    You may Retake the assessment up to <strong>{assessmentConfig?.maxRemediation || 0} times</strong>
+                  </p>
+                </div>
+              </div>
+              
+              <div className="mb-6">
+                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <input
+                    type="checkbox"
+                    id="confirmation"
+                    checked={isConfirmed}
+                    onChange={(e) => setIsConfirmed(e.target.checked)}
+                    className="w-5 h-5 border-gray-300 rounded cursor-pointer"
+                  />
+                  <Label 
+                    htmlFor="confirmation" 
+                    className="text-gray-700 text-sm leading-relaxed cursor-pointer select-none"
+                  >
+                    I have read and understood the assessment information above
+                  </Label>
+                </div>
+              </div>
+              
+              <div className="flex justify-center">
+                <Button
+                  onClick={() => {
+                    setShowConfirmation(false);
+                    startTimer();
+                  }}
+                  disabled={!isConfirmed}
+                  className={`font-semibold px-8 py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 ${
+                    isConfirmed 
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white hover:shadow-xl' 
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                >
+                  Agree & Start Assessment
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full animate-pulse"></div>
@@ -351,7 +535,7 @@ const Assessment = () => {
       <div className="relative z-10 p-6">
         <div className="max-w-4xl mx-auto">
           {/* Enhanced Header */}
-          <div className="flex items-center justify-end mb-6 animate-fade-in">
+          <div className="flex items-center justify-between mb-6 animate-fade-in">
             <Button
               onClick={() => {
                 if (state.assessmentSource === 'learning' && concept) {
@@ -376,13 +560,40 @@ const Assessment = () => {
                 {concept || "Full Assessment"}
               </div>
             </div> */}
+            
+            {/* Timer Component */}
+            {assessmentConfig?.isTimed && (
+              <div className={`flex items-center gap-3 px-4 py-2 rounded-full border transition-all duration-300 ${
+                timeExpired 
+                  ? 'bg-red-100 border-red-500 animate-pulse' 
+                  : isSeventyPercentPassed
+                  ? 'bg-red-100 border-red-500 animate-pulse'
+                  : 'bg-blue-100 border-blue-500'
+              }`}>
+                <Timer className={`h-5 w-5 ${
+                  timeExpired ? 'text-red-600 animate-pulse' : 
+                  isSeventyPercentPassed
+                  ? 'text-red-600 animate-pulse'
+                  : 'text-blue-600'
+                }`} />
+                <span className={`font-mono font-bold text-lg ${
+                  timeExpired ? 'text-red-600 animate-pulse' : 
+                  isSeventyPercentPassed
+                  ? 'text-red-600 animate-pulse'
+                  : 'text-blue-600'
+                }`}>
+                  {formatTime(timeRemaining)}
+                </span>
+                {timeExpired && <AlertTriangle className="h-4 w-4 text-red-600 animate-pulse" />}
+              </div>
+            )}
           </div>
 
           {/* Enhanced Progress Section */}
           <div className="mb-6 animate-scale-in">
             <div className="flex justify-between items-center mb-2">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                {concept ? `${concept} Assessment` : "Artificial Learning and Machine Learning Assessment"}
+                {courseNameFromApi || concept ? `${courseNameFromApi || concept} Assessment` : "Assessment"}
               </h1>
               <div className="flex items-center gap-2">
                 <Zap className="h-5 w-5 text-yellow-500 animate-pulse" />

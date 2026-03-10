@@ -25,6 +25,7 @@ const Evaluation = () => {
   const [showMCQResults, setShowMCQResults] = useState<string | null>(null);
   const [loadingConcept, setLoadingConcept] = useState<string | null>(null);
   const [hasCalledAPI, setHasCalledAPI] = useState(false);
+  const [maxRemediationCount, setMaxRemediationCount] = useState<number>(0);
 
   const getDisplayLabel = (label: string) => {
     if (label === 'Contact Advisor') return 'Novice';
@@ -272,7 +273,7 @@ const Evaluation = () => {
                   <span className="font-medium">{getStatusText(concept.status)}</span>
                 </div>
                 <span className="ml-auto flex items-center gap-1 text-xs text-gray-500 font-semibold">
-                  <Repeat className="h-4 w-4 text-purple-400" /> Attempts: {concept.attempts || 0}
+                  <Repeat className="h-4 w-4 text-purple-400" /> Attempts: <span className={`font-bold ${(concept.attempts || 0) >= maxRemediationCount ? 'text-red-600' : 'text-red-600'}`}>{concept.attempts || 0}</span> / <span className={`font-bold ${(concept.attempts || 0) >= maxRemediationCount ? 'text-red-600' : 'text-black'}`}>{maxRemediationCount}</span>
                 </span>
               </div>
 
@@ -397,7 +398,8 @@ const Evaluation = () => {
           </CardContent>
         </Card>
         {/* Continue Learning Button - Moved outside the card */}
-              {concept.status === 'intervention' && !concept.isRemediationCompleted && (
+        {((concept.status === 'intervention' && !concept.isRemediationCompleted) || 
+          (concept.status !== 'mastery' && (concept.attempts || 0) < maxRemediationCount)) && (
           <motion.div
             className="mt-4"
             whileHover={{ scale: 1.02 }} 
@@ -405,15 +407,31 @@ const Evaluation = () => {
                     onClick={(e) => {
                       e.stopPropagation();
                       handleContinueLearning(concept.concept);
+                }}
+              >
+          <motion.div
+            animate={{
+              borderColor: ['#c2410c', '#b91c1c', '#c2410c'],
+              boxShadow: [
+                '0 0 0 0 rgba(185,28,28,0.9)',
+                '0 0 0 16px rgba(185,28,28,0)',
+                '0 0 0 0 rgba(185,28,28,0.9)'
+              ]
+            }}
+            transition={{
+              duration: 1.1,
+              repeat: Infinity,
+              ease: "easeInOut"
                     }}
                   >
             <Button 
               variant="outline" 
               size="sm" 
-              className="w-full bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200 hover:from-orange-100 hover:to-yellow-100 transition-all duration-200 shadow-sm hover:shadow-md"
+              className="w-full bg-gradient-to-r from-orange-50 to-yellow-50 border-2 border-orange-700 hover:from-orange-100 hover:to-yellow-100 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
             >
                     Continue Learning
                   </Button>
+                </motion.div>
                 </motion.div>
               )}
       </motion.div>
@@ -430,6 +448,10 @@ const Evaluation = () => {
       try {
         const evalScores = await getConfiguredEvaluatedAssessmentScores();
         if (evalScores && Array.isArray(evalScores.evaluationData) && evalScores.evaluationData.length > 0) {
+          if (evalScores.maxRemediationConfigCount !== undefined && evalScores.maxRemediationConfigCount !== null) {
+            setMaxRemediationCount(evalScores.maxRemediationConfigCount);
+          }
+          
           const mappedScores = evalScores.evaluationData.map(item => {
             const rawLevel = (item.level ?? '').toString().trim();
             const normalizedLevel = rawLevel.replace(/^['"]|['"]$/g, '').replace(/_/g, ' ');
@@ -496,7 +518,7 @@ const Evaluation = () => {
               duration: 0.8,
               scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
             }}
-            className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 max-w-md"
+            className="fixed top-18 left-1/2 transform -translate-x-1/2 z-50 max-w-xl"
           >
             <div className="bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 p-1 rounded-xl shadow-2xl">
               <div className="bg-white rounded-lg p-4 relative backdrop-blur-sm">
@@ -532,7 +554,7 @@ const Evaluation = () => {
                   </div>
                 </div>
                 <p className="text-sm text-gray-700">
-                  🎉 Great job completing your assessment! Your personalized learning pathway is ready. Overall MCQ Score: <strong>{overallMCQScore}%</strong>
+               🎉 Almost there! You didn’t reach the minimum score yet, but your personalized pathway is ready with micro-concepts to help strengthen your understanding.<br></br>Click <strong> Continue Learning</strong> to review the material and attempt the assessment again.
                 </p>
               </div>
             </div>
@@ -716,16 +738,18 @@ const Evaluation = () => {
                   <p className="text-green-700 mb-6 text-lg">
                     Congratulations! You've mastered all concepts with an overall MCQ score of {overallMCQScore}%! Your analysis is complete and you're ready for the next level!
                   </p>
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  {/* Button hidden from UI */}
+                  {/* <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button 
                       onClick={handleNextModule}
                       size="lg"
-                      className="h-14 px-12 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-300"
+                      disabled
+                      className="h-14 px-12 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-300 opacity-50 cursor-not-allowed"
                     >
                       <Trophy className="h-6 w-6 mr-3" />
                       ADVANCE TO NEXT MODULE
                     </Button>
-                  </motion.div>
+                  </motion.div> */}
                 </CardContent>
               </Card>
             </motion.div>
