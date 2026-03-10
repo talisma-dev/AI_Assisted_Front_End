@@ -12,6 +12,7 @@ export interface EvaluationItem {
 
 export interface EvaluateResponse {
   evaluationData: EvaluationItem[];
+  maxRemediationConfigCount?: number | null;
 }
 
 export async function evaluateAssessment(answersByQuestionId: EvaluatePayload, conceptName: string | null = null): Promise<EvaluateResponse> {
@@ -19,10 +20,10 @@ export async function evaluateAssessment(answersByQuestionId: EvaluatePayload, c
     await new Promise(r => setTimeout(r, 400));
     return {
       evaluationData: [
-        { concept: 'Storage Practices', score: 82, level: 'Mastered', attemptCount: 1 },
-        { concept: 'Medication Ordering and Transcription', score: 66, level: 'Intermediate', attemptCount: 1 },
-        { concept: 'Dispensing and High-Alert Medications', score: 45, level: 'Novice', attemptCount: 1 },
-        { concept: 'Dosage and IV Infusion Calculations', score: 73, level: 'Intermediate', attemptCount: 1 },
+        { concept: 'Storage Practices', score: 82, level: 'Mastered', attemptCount: 1, isRemediationCompleted: false },
+        { concept: 'Medication Ordering and Transcription', score: 66, level: 'Intermediate', attemptCount: 1, isRemediationCompleted: false },
+        { concept: 'Dispensing and High-Alert Medications', score: 45, level: 'Novice', attemptCount: 1, isRemediationCompleted: false },
+        { concept: 'Dosage and IV Infusion Calculations', score: 73, level: 'Intermediate', attemptCount: 1, isRemediationCompleted: false },
       ]
     };
   }
