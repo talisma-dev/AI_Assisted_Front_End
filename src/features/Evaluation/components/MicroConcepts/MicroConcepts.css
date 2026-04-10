@@ -1,0 +1,291 @@
+/* ── MicroConcepts Grid ── */
+.concepts-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  width: 100%;
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.concepts-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.concepts-grid::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.concepts-grid::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.concepts-grid::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.concepts-grid-no-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.concepts-grid-no-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Concept Card ── */
+.concept-card {
+  background: linear-gradient(145deg, #fff 0%, #f8fafc 100%);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 24px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 10px 20px -5px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  min-height: 360px;
+  max-width: 500px;
+}
+
+.concept-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 30px color-mix(in srgb, var(--accent, #8b5cf6) 15%, transparent), 0 12px 24px -8px rgba(0, 0, 0, 0.1);
+}
+
+.concept-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* Circle progress */
+.concept-circle-wrapper {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.concept-circle-svg {
+  width: 96px;
+  height: 96px;
+  position: absolute;
+  transform: rotate(-90deg);
+}
+
+.concept-circle-svg circle:first-child {
+  stroke: #e2e8f0;
+  stroke-width: 6;
+}
+
+.concept-circle-svg circle:last-child {
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.concept-circle-svg circle.green {
+  stroke: #10b981;
+}
+
+.concept-circle-svg circle.amber {
+  stroke: #f59e0b;
+}
+
+.concept-circle-svg circle.red {
+  stroke: #ef4444;
+}
+
+.concept-circle-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.concept-circle-text.green-text {
+  color: #10b981;
+}
+
+.concept-circle-text.amber-text {
+  color: #f59e0b;
+}
+
+.concept-circle-text.red-text {
+  color: #ef4444;
+}
+
+/* Badge */
+.attempts-badge {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 8px 20px;
+  border-radius: 100px;
+  text-transform: uppercase;
+  border: 1px solid var(--accent);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.attempts-label {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.attempts-count {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+/* Card body */
+.concept-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.concept-name {
+  font-size: 26px;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.concept-desc {
+  font-size: 16px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Buttons */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px 0;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.btn-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Mastered Button */
+.btn-mastered {
+  background: #f0fdf4;
+  color: var(--success);
+  border: 1px solid #bbf7d0;
+  cursor: default;
+}
+
+/* Continue Learning Button */
+.btn-card-continue {
+  background: #fff;
+  color: var(--accent);
+  border-color: var(--accent-border);
+  text-transform: none;
+  /* Avoid uppercase issue */
+}
+
+.btn-card-continue:hover {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+}
+
+
+/* Max Limit Button */
+.btn-max-limit {
+  background: #fff;
+  color: var(--danger);
+  border-color: #f1f5f9;
+  cursor: not-allowed;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1280px) {
+  .concepts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .concepts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .concept-card {
+    padding: 24px;
+    gap: 16px;
+    min-height: auto;
+  }
+
+  .concept-name {
+    font-size: 22px;
+  }
+
+  .concept-desc {
+    font-size: 14px;
+  }
+
+  .concept-circle-wrapper, .concept-circle-svg {
+    width: 80px;
+    height: 80px;
+  }
+
+  .concept-circle-text {
+    font-size: 18px;
+  }
+
+  .attempts-badge {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    padding: 6px 12px;
+    border-radius: 16px;
+  }
+
+  .attempts-label {
+    font-size: 8px;
+  }
+
+  .attempts-count {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 400px) {
+  .concept-card {
+    padding: 16px;
+  }
+  
+  .concept-card-top {
+    gap: 8px;
+  }
+}

@@ -1,73 +1,103 @@
-# Welcome to your Lovable project
+# AI Learning Frontend
 
-## Project info
+A clean, structured React application for AI-assisted learning assessments.
 
-**URL**: https://lovable.dev/projects/320b2d14-e623-4556-b1a1-24048f6b8839
+## 🏗️ Project Structure
 
-## How can I edit this code?
+```
+src/
+├── api/                    # API layer
+│   ├── auth.js            # Authentication functions
+│   ├── base.js            # Base API configuration
+│   └── utility.js         # Assessment and data utilities
+├── components/            # React components
+│   ├── Assessment/        # Assessment component
+│   ├── BlackboardLoading/ # Blackboard LMS loading
+│   ├── DirectLinkLoading/ # Direct link loading
+│   ├── ErrorBoundary/    # Error handling
+│   ├── ErrorPage/        # Error display
+│   ├── Evaluation/       # Evaluation results
+│   ├── Header/           # App header
+│   ├── Loader/           # Loading states
+│   ├── SSOLoading/       # SSO authentication
+│   └── UI/               # Reusable UI components
+├── constants/             # Configuration constants
+│   └── routes.js         # Routes and app config
+├── contexts/             # React contexts
+│   └── AppContext.js     # Global app state
+├── styles/               # Global styles
+│   └── globals.css      # Application styles
+├── utils/               # Utility functions
+│   └── timeTracker.js  # Time tracking utilities
+├── App.jsx              # Main application component
+└── main.jsx            # Application entry point
+```
 
-There are several ways of editing your application.
+## 🚀 Features
 
-**Use Lovable**
+### Authentication Flow
+- **SSO Login** (`/sso`) - Backend-driven redirect
+- **Direct Link** (`/direct`) - Score-based routing
+- **Blackboard LMS** (`/lms`) - Direct to evaluation
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/320b2d14-e623-4556-b1a1-24048f6b8839) and start prompting.
+### Core Functionality
+- Assessment generation and submission
+- Performance evaluation and scoring
+- Real-time progress tracking
+- Error handling and recovery
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🛠️ Technical Stack
 
-**Use your preferred IDE**
+- **React 19** - UI framework
+- **React Router** - Client-side routing
+- **Vite** - Build tool and dev server
+- **Lucide React** - Icon library
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 📝 Environment Variables
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```env
+VITE_API_BASE_URL=https://your-api-url.com
+VITE_MOCK=false
+```
 
-Follow these steps:
+## 🚦 Getting Started
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+1. Install dependencies:
+```bash
+npm install
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+2. Start development server:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+3. Build for production:
+```bash
+npm run build
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🔧 Configuration
 
-**Use GitHub Codespaces**
+The application uses three main entry points:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- `/sso` - Single Sign-On authentication
+- `/direct` - Direct link access with student/course GUIDs
+- `/lms` - Blackboard LMS integration
 
-## What technologies are used for this project?
+Each route automatically determines whether to show the assessment or evaluation page based on user data.
 
-This project is built with:
+## 📊 API Integration
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+The app integrates with backend APIs for:
+- Authentication and token management
+- Assessment data generation
+- Score evaluation and tracking
+- Course configuration
 
-## How can I deploy this project?
+## 🎯 Design Principles
 
-Simply open [Lovable](https://lovable.dev/projects/320b2d14-e623-4556-b1a1-24048f6b8839) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- **Clean Architecture** - Separation of concerns
+- **Minimal Dependencies** - Only essential packages
+- **Error Resilience** - Comprehensive error handling
+- **Performance Optimized** - Efficient data fetching and caching

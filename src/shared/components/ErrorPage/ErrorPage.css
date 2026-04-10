@@ -1,0 +1,205 @@
+.error-page {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 40px 20px;
+  font-family: var(--sans);
+}
+
+.error-container {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  padding: 48px 40px;
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: var(--shadow);
+}
+
+/* Error Modal Styles - using ConfirmationModal classes */
+.error-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.error-icon {
+  width: 40px;
+  height: 40px;
+  color: #ef4444;
+}
+
+.error-message-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 40px 0;
+}
+
+.error-message-list .confirmation-item {
+  position: relative;
+  padding-left: 28px;
+  margin-bottom: 24px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+.error-message-list .confirmation-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid #ef4444;
+  background: white;
+}
+
+.button-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Original ErrorPage styles for non-modal usage */
+.error-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: var(--accent-bg);
+  border-radius: 50%;
+  margin-bottom: 24px;
+}
+
+.error-icon {
+  width: 40px;
+  height: 40px;
+  color: var(--accent);
+}
+
+.error-title {
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--text-h);
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+  font-family: var(--heading);
+}
+
+.error-message {
+  font-size: 16px;
+  color: #475569;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.error-details-container {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 0 0 32px 0;
+  text-align: left;
+}
+
+.details-header {
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+}
+
+
+.error-stack {
+  background: #1f2937;
+  color: #f9fafb;
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 8px 0 0 0;
+}
+
+.error-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.error-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  min-width: 140px;
+  justify-content: center;
+  font-family: var(--sans);
+  letter-spacing: 0.18px;
+}
+
+.error-button-primary {
+  background: var(--accent);
+  color: white;
+}
+
+.error-button-primary:hover {
+  background: var(--accent-border);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.error-button-secondary {
+  background: var(--code-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.error-button-secondary:hover {
+  background: var(--border);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .error-container {
+    padding: 32px 24px;
+    margin: 16px;
+  }
+  
+  .error-title {
+    font-size: 24px;
+  }
+  
+  .error-message {
+    font-size: 14px;
+  }
+  
+  .error-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .error-button {
+    width: 100%;
+  }
+}
+
