@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Clock, CheckCircle, Sparkles } from 'lucide-react';
+import { Clock, BadgeCheck, Sparkles } from 'lucide-react';
 import './Toast.css';
 
 const Toast = ({ message, type = 'info', duration = 3000, onClose }) => {
@@ -35,7 +35,7 @@ const Toast = ({ message, type = 'info', duration = 3000, onClose }) => {
       case 'time-up':
         return <Clock className="toast-icon" />;
       case 'success':
-        return <CheckCircle className="toast-icon" />;
+        return <BadgeCheck className="toast-icon" />;
       default:
         return <Clock className="toast-icon" />;
     }

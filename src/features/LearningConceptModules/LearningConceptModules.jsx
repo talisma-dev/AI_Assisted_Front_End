@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Info, FileText, RotateCw, Link, CheckCircle, PlayCircle, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Info, FileText, RotateCw, Link, BadgeCheck, PlayCircle, ChevronRight, CheckCircle2 } from "lucide-react";
 import { useApp } from "@core/contexts/AppContext";
 import { generateCourseContent } from "@api/generateCourseContent";
 import SubMicroConcept from "./components/SubMicroConcept/SubMicroConcept";
@@ -190,7 +190,7 @@ const LearningConceptModules = ({ onStartAssessment }) => {
         <section className="co-section co-assessment-section">
           <div className="co-assessment-content">
             <h2 className="co-section-title co-assessment-title">
-              <CheckCircle className="co-check-icon" />
+              <BadgeCheck className="co-check-icon" />
               Assessment Readiness
               {!isLoading && conceptsList.length > 0 && (
                 <span className="co-progress-badge">

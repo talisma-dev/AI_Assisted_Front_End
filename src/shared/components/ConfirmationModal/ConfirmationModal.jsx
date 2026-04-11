@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, ChevronDown, ChevronUp, BookOpen } from 'lucide-react';
+import { BadgeCheck, ChevronDown, ChevronUp, BookOpen } from 'lucide-react';
 import Modal from '../UI/Modal/Modal';
 import './ConfirmationModal.css';
 
@@ -109,7 +109,7 @@ const ConfirmationModal = ({ onConfirm, isOpen, showTimer, duration, masteryThre
           onClick={() => setIsChecked(!isChecked)}
         >
           <div className="custom-checkbox">
-            <Check className="checkbox-check" />
+            <BadgeCheck className="checkbox-check" />
           </div>
           <span className="acknowledgement-text">
             I have read and understood the assessment information above

@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, ArrowRight } from 'lucide-react';
+import { BadgeCheck, ArrowRight } from 'lucide-react';
 import './MicroConcepts.css';
 
 const MicroConcepts = ({ attempts, conceptPerformance = [], buttonTexts = {}, onConceptCountChange }) => {
@@ -42,7 +42,7 @@ const MicroConcepts = ({ attempts, conceptPerformance = [], buttonTexts = {}, on
       Mastered: {
         text: buttonTexts.mastered || 'Mastered',
         class: 'btn-mastered',
-        icon: <Check className="btn-icon" />
+        icon: <BadgeCheck className="btn-icon" />
       },
       Remediation: {
         text: buttonTexts.continueLearning || 'Continue Learning',
