@@ -1,0 +1,164 @@
+.loader-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 40px 20px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.spinner-wrap {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.orbit {
+  position: absolute;
+  border-radius: 50%;
+  border: 2.5px solid var(--accent-bg);
+  border-top-color: var(--accent);
+}
+
+.orbit-1 { width: 190px; height: 190px; animation: spin 6s linear infinite; }
+.orbit-2 { width: 154px; height: 154px; animation: spin 4s linear infinite reverse; }
+.orbit-3 { width: 118px; height: 118px; animation: spin 3s linear infinite; }
+
+.dot {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: dotBlink 2s ease-in-out infinite;
+}
+
+.dot-1 { width: 8px; height: 8px; top: -4.5px; left: 50%; transform: translateX(-50%); }
+.dot-2 { width: 10px; height: 10px; top: 50%; right: -5.5px; transform: translateY(-50%); opacity: 0.7; animation-delay: 0.5s; }
+.dot-3 { width: 6px; height: 6px; bottom: 10%; left: 10%; opacity: 0.8; animation-delay: 1.2s; }
+
+.orbit-center {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 5px 20px var(--accent-bg);
+}
+
+.center-arc {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, var(--accent) 0%, var(--accent-border) 40%, var(--accent-bg) 70%, transparent 100%);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #fff 0);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #fff 0);
+  animation: spin 0.8s linear infinite reverse;
+}
+
+.brain-icon {
+  color: var(--accent);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 0.8; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 1; 
+    transform: scale(1.1);
+  }
+}
+
+@keyframes spin {
+  from { rotate: 0deg; }
+  to { rotate: 360deg; }
+}
+
+@keyframes dotBlink {
+  0%, 100% { scale: 1; opacity: 0.8; }
+  50% { scale: 1.4; opacity: 1; }
+}
+
+.loader-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 24px;
+}
+
+.progress-section {
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 20px;
+}
+
+.loader-subtitle {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 6px;
+  text-align: left;
+}
+
+.progress-outer {
+  height: 7px;
+  background: #e2e8f0;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progress-inner {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-border));
+  border-radius: 99px;
+  transition: width 0.15s ease;
+}
+
+.loader-caption {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* Small Size Modifier */
+.loader-container.size-sm {
+  background: transparent;
+  padding: 20px 10px;
+}
+.loader-container.size-sm .spinner-wrap {
+  width: 140px;
+  height: 140px;
+  margin-bottom: 24px;
+}
+.loader-container.size-sm .orbit-1 { width: 130px; height: 130px; border-width: 2px; }
+.loader-container.size-sm .orbit-2 { width: 106px; height: 106px; border-width: 2px; }
+.loader-container.size-sm .orbit-3 { width: 82px; height: 82px; border-width: 2px; }
+.loader-container.size-sm .orbit-center { width: 50px; height: 50px; }
+.loader-container.size-sm .center-arc { width: 30px; height: 30px; }
+.loader-container.size-sm .dot-1 { width: 6px; height: 6px; top: -3.5px; }
+.loader-container.size-sm .dot-2 { width: 8px; height: 8px; right: -4.5px; }
+.loader-container.size-sm .dot-3 { width: 5px; height: 5px; }
+
+.loader-container.size-sm .loader-title {
+  font-size: 20px;
+  margin: 0 0 16px;
+}
+.loader-container.size-sm .progress-section {
+  max-width: 400px;
+  margin-bottom: 16px;
+}
+.loader-container.size-sm .loader-subtitle {
+  font-size: 12px;
+}
+.loader-container.size-sm .loader-caption {
+  font-size: 13px;
+}
