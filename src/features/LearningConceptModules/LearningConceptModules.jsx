@@ -42,9 +42,9 @@ const LearningConceptModules = ({ onStartAssessment }) => {
         setIsLoading(true);
         setFetchError(null);
         const data = await generateCourseContent(conceptPerformance.name);
-        
+
         lastFetchedNameRef.current = conceptPerformance.name;
-        
+
         const modules = data.data || [];
         const formattedModules = modules.map((m, idx) => ({
           ...m,

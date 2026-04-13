@@ -17,7 +17,7 @@ export const DEFAULT_APP_CONFIG = {
   courseId: '',
   moduleId: '',
   courseTitle: '',
-  userName: 'CHANDAN',
+  userName: 'USER',
   userRole: '',
   showTimer: true,
   duration: 1,

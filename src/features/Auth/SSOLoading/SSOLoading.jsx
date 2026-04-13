@@ -55,7 +55,7 @@ const SSOLoading = () => {
 
         if (studentGuid) localStorage.setItem('student_id', studentGuid);
         if (courseGuid) localStorage.setItem('course_id', courseGuid);
-        if (courseGuid) localStorage.setItem('module_id', courseGuid);
+        // if (courseGuid) localStorage.setItem('module_id', courseGuid);
 
         console.log('JWT Token and GUIDs set successfully:', { studentGuid, courseGuid });
 
@@ -67,7 +67,7 @@ const SSOLoading = () => {
           console.warn('Failed to reset time tracker:', e);
         }
 
-        // Step 3: Normalize the redirectUrl to stay on localhost (strip domain if absolute)
+        // Step 3: Normalize the redirectUrl to stay on localhost 
         let finalPath = ssoResponse.redirectUrl;
         if (finalPath) {
           try {
@@ -96,7 +96,6 @@ const SSOLoading = () => {
     }
   }, [searchParams]);
 
-  // Navigate once AppContext is ready and auth is done
   useEffect(() => {
     if (!isLoading && authCalledRef.current && !isProcessing && !error) {
       if (redirectPath && redirectPath.includes('/assessment')) {

@@ -13,10 +13,9 @@ import ErrorPage from '@shared/components/ErrorPage/ErrorPage';
 import TimeExpiredModal from './components/TimeExpiredModal/TimeExpiredModal';
 
 export default function Assessment({
-  questionsCount,
   onAssessmentComplete,
   onAssessmentSubmit,
-  conceptId,
+  // conceptId,
   courseTitle,
   onLoadError,
   onLoadSuccess,
@@ -40,18 +39,16 @@ export default function Assessment({
   const [error, setError] = useState(null);
   const [showTimeUpModal, setShowTimeUpModal] = useState(false);
 
-  // Use pre-fetched data from AppContext
   useEffect(() => {
-    if (preFetchedData && preFetchedData.length > 0) {
+    if (preFetchedData && preFetchedData.length > 0 && isLoading) {
       setQuestions(preFetchedData);
       lastTickRef.current = Date.now();
       activeTimeRef.current = 0;
       if (onLoadSuccess) onLoadSuccess(config.duration * 60);
       setIsLoading(false);
     }
-  }, [preFetchedData, config.duration, onLoadSuccess]);
+  }, [preFetchedData, config.duration, onLoadSuccess, isLoading]);
 
-  // Track active time only when tab is visible
   useEffect(() => {
     const handleVisibility = () => {
       if (document.hidden) {
@@ -64,7 +61,6 @@ export default function Assessment({
     return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, []);
 
-  // Handle automatic submission trigger when time is up
   useEffect(() => {
     if (isTimeUp && !isSubmitted && !isEvaluating) {
       setShowTimeUpModal(true);
@@ -100,7 +96,6 @@ export default function Assessment({
     }));
   };
 
-  // Check if all questions are attended (answered or flagged)
   const allQuestionsAttended = answeredCount === totalQuestions ||
     (answeredCount + Object.keys(flaggedQuestions).length) === totalQuestions;
 
@@ -110,7 +105,6 @@ export default function Assessment({
       setIsEvaluating(true);
       if (onAssessmentSubmit) onAssessmentSubmit();
 
-      // Calculate final active time (adding the current active segment)
       const currentSegment = Math.floor((Date.now() - lastTickRef.current) / 1000);
       const totalActiveTime = activeTimeRef.current + currentSegment;
 
@@ -321,5 +315,3 @@ export default function Assessment({
     </div>
   );
 }
-
-// Remove standalone export
