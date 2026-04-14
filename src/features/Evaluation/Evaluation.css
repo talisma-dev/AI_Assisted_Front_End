@@ -73,7 +73,7 @@
 
 .summary-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 0 30px color-mix(in srgb, var(--accent, #8b5cf6) 20%, transparent), 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 0 30px color-mix(in srgb, var(--accent) 20%, transparent), 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .card-icon-wrapper {
@@ -138,8 +138,8 @@
 
 /* Card type styles */
 .time-card .card-icon-wrapper {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent) 100%);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
 .mastered-card .card-icon-wrapper {

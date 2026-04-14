@@ -1,17 +1,20 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getConfiguredEvaluatedAssessmentScores } from '@api/getConfiguredEvaluatedAssessmentScores';
 import { getToken } from '@api/base';
-import { DEFAULT_APP_CONFIG } from '@core/constants/routes';
 
 const AppContext = createContext();
-const parseAppConfig = (data, defaultConfig) => {
-  if (!data) return defaultConfig;
+const parseAppConfig = (data) => {
+  if (!data) return {};
 
   return {
-    ...defaultConfig,
-    courseTitle: data.courseName || defaultConfig.courseTitle,
-    attempts: data.maxRemediationConfigCount ?? defaultConfig.attempts,
-    masteryThreshold: data.masteryThreshold ?? defaultConfig.masteryThreshold,
+    courseTitle: data.courseName || '',
+    attempts: data.maxRemediationConfigCount ?? 0,
+    masteryThreshold: data.masteryThreshold ?? 0,
+    themeColor: data.themeColor || '#3b82f6',
+    showTimer: data.showTimer ?? false,
+    duration: data.duration ?? 0,
+    userName: data.userName || '',
+    userRole: data.userRole || '',
   };
 };
 
@@ -35,8 +38,11 @@ const applyThemeAndMeta = (config) => {
   }
 
   if (config.themeColor) {
-    document.documentElement.style.setProperty('--accent-color', config.themeColor);
+    document.documentElement.style.setProperty('--accent', config.themeColor);
     document.documentElement.style.setProperty('--accent-glow', `${config.themeColor}33`);
+    document.documentElement.style.setProperty('--accent-light', `${config.themeColor}1a`);
+    document.documentElement.style.setProperty('--accent-border', `${config.themeColor}4d`);
+    document.documentElement.style.setProperty('--accent-bg', `${config.themeColor}1a`);
   }
 
   if (config.colors) {
@@ -48,7 +54,7 @@ const applyThemeAndMeta = (config) => {
 
 
 export const AppProvider = ({ children }) => {
-  const [config, setConfig] = useState(DEFAULT_APP_CONFIG);
+  const [config, setConfig] = useState({});
   const [performanceData, setPerformanceData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
@@ -71,7 +77,7 @@ export const AppProvider = ({ children }) => {
       const data = await getConfiguredEvaluatedAssessmentScores();
 
       if (data) {
-        const freshConfig = parseAppConfig(data, DEFAULT_APP_CONFIG);
+        const freshConfig = parseAppConfig(data);
         setConfig(freshConfig);
 
         const rawList = data.data || [];
