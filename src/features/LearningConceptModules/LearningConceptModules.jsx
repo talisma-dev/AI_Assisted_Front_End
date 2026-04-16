@@ -28,10 +28,17 @@ const LearningConceptModules = ({ onStartAssessment }) => {
   const lastFetchedNameRef = useRef(null);
 
   useEffect(() => {
+    // Check if assessment was already submitted - prevent going back to learning after submission
+    const alreadySubmitted = sessionStorage.getItem('assessment-submitted');
+    if (alreadySubmitted === 'true') {
+      navigate(ROUTES.EVALUATION, { replace: true });
+      return;
+    }
+
     if (!performanceData && !isAppLoading) {
       refreshAppData();
     }
-  }, [performanceData, isAppLoading, refreshAppData]);
+  }, [performanceData, isAppLoading, refreshAppData, navigate]);
 
   const conceptPerformance = performanceData?.conceptPerformance?.find(c =>
     (conceptIdFromQuery && String(c.id) === String(conceptIdFromQuery)) ||
