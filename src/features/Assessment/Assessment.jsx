@@ -42,7 +42,14 @@ export default function Assessment({
   const [showTimeUpModal, setShowTimeUpModal] = useState(false);
   const [showSubmitConfirmation, setShowSubmitConfirmation] = useState(false);
 
+  // Check if already submitted this session - prevent retaking
   useEffect(() => {
+    const alreadySubmitted = sessionStorage.getItem('assessment-submitted');
+    if (alreadySubmitted === 'true') {
+      navigate(ROUTES.EVALUATION, { replace: true });
+      return;
+    }
+
     if (preFetchedData && preFetchedData.length > 0 && isLoading) {
       setQuestions(preFetchedData);
       lastTickRef.current = Date.now();
@@ -50,10 +57,9 @@ export default function Assessment({
       if (onLoadSuccess) onLoadSuccess(config.duration * 60);
       setIsLoading(false);
     } else if (!preFetchedData && !loadingAssessment && isLoading) {
-
       setIsLoading(false);
     }
-  }, [preFetchedData, config.duration, onLoadSuccess, isLoading]);
+  }, [preFetchedData, config.duration, onLoadSuccess, isLoading, navigate]);
 
   useEffect(() => {
 
@@ -97,6 +103,9 @@ export default function Assessment({
   const currentQuestion = questions[currentIndex];
   const totalQuestions = questions.length;
   const answeredCount = Object.keys(userAnswers).length;
+  const flaggedCount = Object.keys(flaggedQuestions).length;
+  const flaggedOnlyCount = Object.keys(flaggedQuestions).filter(id => userAnswers[id] === undefined).length;
+  const notVisitedCount = totalQuestions - answeredCount - flaggedOnlyCount;
   const progressPercentage = totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
 
   const toggleFlag = () => {
@@ -117,10 +126,18 @@ export default function Assessment({
 
   const selectOption = (option) => {
     if (!currentQuestion) return;
+    const currentAnswer = userAnswers[currentQuestion.question_id];
+    if (currentAnswer === option) {
+      setUserAnswers(prev => {
+        const { [currentQuestion.question_id]: removed, ...rest } = prev;
+        return rest;
+      });
+    } else {
     setUserAnswers(prev => ({
       ...prev,
       [currentQuestion.question_id]: option
     }));
+    }
   };
 
   const allQuestionsAttended = answeredCount === totalQuestions ||
@@ -139,6 +156,7 @@ export default function Assessment({
     try {
       setShowTimeUpModal(false);
       setIsEvaluating(true);
+      sessionStorage.setItem('assessment-submitted', 'true');
       if (onAssessmentSubmit) onAssessmentSubmit();
 
       const currentSegment = Math.floor((Date.now() - lastTickRef.current) / 1000);
@@ -184,15 +202,20 @@ export default function Assessment({
 
   const handleAnalysisComplete = () => {
     setIsNavigating(true);
+    setQuestions([]); 
     onAssessmentComplete?.();
-    navigate(ROUTES.EVALUATION);
+    navigate(ROUTES.EVALUATION, { replace: true });
   };
 
   useEffect(() => {
-    if (conceptId && !questions.length && !isLoading && !isNavigating) {
+    if (!questions.length && isSubmitted && !isNavigating) {
+      navigate(ROUTES.EVALUATION, { replace: true });
+      return;
+    }
+    if (conceptId && !questions.length && !isLoading && !isNavigating && !isSubmitted) {
       navigate(`${ROUTES.LEARNING}?conceptId=${conceptId}`);
     }
-  }, [conceptId, questions.length, isLoading, isNavigating, navigate]);
+  }, [conceptId, questions.length, isLoading, isNavigating, navigate, isSubmitted]);
 
   if (isNavigating) return null;
 
@@ -282,6 +305,11 @@ export default function Assessment({
               <div className="progress-text">Complete</div>
             </div>
           </div>
+          <div className="legend-collapsed">
+            <div className="legend-item-collapsed"><span className="status-dot answered" /> {answeredCount}</div>
+            <div className="legend-item-collapsed"><span className="status-dot flagged" /> {flaggedCount}</div>
+            <div className="legend-item-collapsed"><span className="status-dot not-visited" /> {notVisitedCount}</div>
+          </div>
         </div>
 
         <div className="sidebar-content">
@@ -294,15 +322,15 @@ export default function Assessment({
             <div className="navigation-grid-container">
               <div className="navigation-grid">
                 {questions.map((q, idx) => {
-                  let statusClass = '';
-                  if (idx === currentIndex) statusClass = 'current';
-                  else if (userAnswers[q.question_id] !== undefined) statusClass = 'answered';
-                  else if (flaggedQuestions[q.question_id]) statusClass = 'flagged';
+                  const statusClasses = [];
+                  if (idx === currentIndex) statusClasses.push('current');
+                  if (userAnswers[q.question_id] !== undefined) statusClasses.push('answered');
+                  if (flaggedQuestions[q.question_id]) statusClasses.push('flagged');
 
                   return (
                     <div
                       key={q.question_id}
-                      className={`nav-item ${statusClass}`}
+                      className={`nav-item ${statusClasses.join(' ')}`}
                       onClick={() => setCurrentIndex(idx)}
                     >
                       {idx + 1}
@@ -322,9 +350,9 @@ export default function Assessment({
               <div className="progress-bar-fill" style={{ width: `${progressPercentage}%` }} />
             </div>
             <div className="legend">
-              <div className="legend-item"><span className="status-dot answered" /> ANSWERED</div>
-              <div className="legend-item"><span className="status-dot flagged" /> FOR REVIEW</div>
-              <div className="legend-item"><span className="status-dot not-visited" /> NOT VISITED</div>
+              <div className="legend-item"><span className="status-dot answered" /> ANSWERED ({answeredCount})</div>
+              <div className="legend-item"><span className="status-dot flagged" /> FOR REVIEW ({flaggedCount})</div>
+              <div className="legend-item"><span className="status-dot not-visited" /> NOT VISITED ({notVisitedCount})</div>
             </div>
           </div>
         </div>

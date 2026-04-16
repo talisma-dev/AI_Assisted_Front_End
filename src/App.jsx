@@ -120,6 +120,7 @@ function AppContent() {
   }, [isLoading, config.courseTitle, location.pathname, assessmentData, loadingAssessment, assessmentError, currentConceptId, fetchAssessmentData]);
 
   const handleInitiateAssessment = useCallback((conceptId = null) => {
+    sessionStorage.removeItem('assessment-submitted');
     setCurrentConceptId(conceptId);
     setIsTimeUp(false);
     resetAssessmentData();
@@ -166,7 +167,10 @@ function AppContent() {
                 currentConceptId={currentConceptId}
                 fetchAssessmentData={fetchAssessmentData}
                 navigate={navigate}
-                onConfirm={() => navigate(ROUTES.ASSESSMENT)}
+                onConfirm={() => {
+                  sessionStorage.removeItem('assessment-submitted');
+                  navigate(ROUTES.ASSESSMENT, { replace: true });
+                }} 
                 loadingAssessment={loadingAssessment}
               />
             </ProtectedRoute>

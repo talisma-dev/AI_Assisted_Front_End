@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchStudentProfile } from '@core/store/studentProfileActions';
 import { isTokenValid } from '@api/base';
 import Loader from '@shared/components/Loader/Loader';
+import ErrorPage from '@shared/components/ErrorPage/ErrorPage';
 
 const PUBLIC_ROUTES = ['/sso', '/direct', '/lms', '/'];
 
@@ -18,7 +19,6 @@ const ProtectedRoute = ({ children }) => {
   const fetchingRef = useRef(false);
   const pathname = window.location.pathname;
 
-  // Fetch profile on mount if needed
   useEffect(() => {
     if (isPublicRoute(pathname)) return;
 
@@ -34,7 +34,6 @@ const ProtectedRoute = ({ children }) => {
     }
   }, [dispatch, profile, isLoading, isInitialized, pathname]);
 
-  // Periodic token validity check (every 5 minutes)
   useEffect(() => {
     if (isPublicRoute(pathname)) return;
 
@@ -60,21 +59,13 @@ const ProtectedRoute = ({ children }) => {
     const isAuthError = error?.status === 401 || error?.message?.toLowerCase().includes('unauthorized');
     
     return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>
-        <h3>Failed to load profile</h3>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '20px' }}>{error}</p>
-        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-          <button onClick={() => dispatch(fetchStudentProfile())}>Retry</button>
-          {(isAuthError || !isTokenValid()) && (
-            <button 
-              onClick={() => navigate('/sso', { replace: true })}
-              style={{ backgroundColor: 'var(--accent)', color: 'white' }}
-            >
-              Go to Login
-            </button>
-          )}
-        </div>
-      </div>
+      <ErrorPage
+        error={error}
+        title="Failed to Load Profile"
+        message={isAuthError ? "Your session has expired. Please log in again." : error}
+        onRetry={isAuthError ? () => navigate('/sso', { replace: true }) : () => dispatch(fetchStudentProfile())}
+        showRetry={true}
+      />
     );
   }
 

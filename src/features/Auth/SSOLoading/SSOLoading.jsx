@@ -22,6 +22,7 @@ const SSOLoading = () => {
       try {
         removeToken();
         dispatch(clearProfile());
+        sessionStorage.removeItem('assessment-submitted'); 
 
         const verificationToken = searchParams.get('token');
         if (!verificationToken) throw new Error('Authentication failed. Please try again.');
@@ -44,14 +45,13 @@ const SSOLoading = () => {
         if (finalPath) {
           try {
             if (finalPath.startsWith('http')) {
-              const normalizedLink = finalPath.replace(/^https?:\/([^\/])/, 'https://$1');
-              const urlObj = new URL(normalizedLink);
+              const urlObj = new URL(finalPath);
               finalPath = urlObj.pathname + urlObj.search;
               studentGuid = studentGuid || urlObj.searchParams.get('student_guid');
               courseGuid = courseGuid || urlObj.searchParams.get('course_guid');
             }
           } catch (e) {
-            console.warn('Redirect URL normalization failed, using as-is:', e);
+            console.warn('Redirect URL parsing failed, using as-is:', e);
           }
         }
 
