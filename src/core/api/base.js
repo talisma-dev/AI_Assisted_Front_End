@@ -1,7 +1,7 @@
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '');
 
-export const setToken = (token) => {
-  document.cookie = `jwt_token=${token}; path=/; secure; samesite=none; max-age=86400`;
+export const setToken = (token,expiry) => {
+  document.cookie = `jwt_token=${token}; path=/; secure; samesite=None; max-age=${expiry}`;
   window.dispatchEvent(new CustomEvent('token-changed', { detail: { token } }));
 };
 
@@ -13,6 +13,7 @@ export const getToken = () => {
 
 export const removeToken = () => {
   document.cookie = 'jwt_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  window.dispatchEvent(new CustomEvent('token-removed'));
 };
 
 export const isTokenValid = () => {
@@ -75,11 +76,17 @@ export const apiFetch = async (endpoint, options = {}) => {
       }
     }
     
-    throw {
+    const error = {
       status: response.status,
       message: errorBody.message || 'API Request failed',
       data: errorBody
     };
+    if (response.status === 401) {
+      removeToken();
+      window.dispatchEvent(new CustomEvent('auth-error', { detail: { type: 'unauthorized' } }));
+    }
+
+    throw error;
   }
 
   const contentType = response.headers.get('content-type');

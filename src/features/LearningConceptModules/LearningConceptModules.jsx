@@ -2,13 +2,15 @@ import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Info, FileText, RotateCw, Link, BadgeCheck, PlayCircle, ChevronRight, CheckCircle2 } from "lucide-react";
 import { useApp } from "@core/contexts/AppContext";
+import { ROUTES } from "@core/constants/routes";
 import { generateCourseContent } from "@api/generateCourseContent";
 import SubMicroConcept from "./components/SubMicroConcept/SubMicroConcept";
 import Loader from "@shared/components/Loader/Loader";
+import ErrorPage from "@shared/components/ErrorPage/ErrorPage";
 import "./LearningConceptModules.css";
 
 const LearningConceptModules = ({ onStartAssessment }) => {
-  const { performanceData, config } = useApp();
+  const { performanceData, config, isLoading: isAppLoading, refreshAppData } = useApp();
   const { conceptName } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -24,6 +26,12 @@ const LearningConceptModules = ({ onStartAssessment }) => {
 
   const fetchingRef = useRef(false);
   const lastFetchedNameRef = useRef(null);
+
+  useEffect(() => {
+    if (!performanceData && !isAppLoading) {
+      refreshAppData();
+    }
+  }, [performanceData, isAppLoading, refreshAppData]);
 
   const conceptPerformance = performanceData?.conceptPerformance?.find(c =>
     (conceptIdFromQuery && String(c.id) === String(conceptIdFromQuery)) ||
@@ -81,16 +89,18 @@ const LearningConceptModules = ({ onStartAssessment }) => {
     }
   };
 
+  useEffect(() => {
+    if (!conceptPerformance && !isLoading && !isAppLoading && performanceData) {
+      navigate(ROUTES.EVALUATION);
+    }
+  }, [conceptPerformance, isLoading, isAppLoading, performanceData, navigate]);
+
   if (!conceptPerformance && !isLoading) {
     return (
-      <div className="co-wrapper">
-        <div className="co-card" style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <h2>Concept not found.</h2>
-          <button onClick={() => navigate('/evaluation')} className="btn-continue" style={{ maxWidth: '200px' }}>
-            Back to Evaluation
-          </button>
-        </div>
-      </div>
+      <Loader
+        title="Loading Learning Content..."
+        subtitle="Please wait while we fetch your concept data."
+      />
     );
   }
 

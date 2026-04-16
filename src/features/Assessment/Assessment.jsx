@@ -10,16 +10,17 @@ import { useApp } from '@core/contexts/AppContext';
 import './Assessment.css';
 import Loader from '@shared/components/Loader/Loader';
 import ErrorPage from '@shared/components/ErrorPage/ErrorPage';
-import TimeExpiredModal from './components/TimeExpiredModal/TimeExpiredModal';
+import AssessmentSummaryModal from './components/AssessmentSummaryModal/AssessmentSummaryModal';
 
 export default function Assessment({
   onAssessmentComplete,
   onAssessmentSubmit,
-  // conceptId,
+  conceptId,
   courseTitle,
   onLoadError,
   onLoadSuccess,
   preFetchedData,
+  loadingAssessment,
   isTimeUp
 }) {
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ export default function Assessment({
   const [currentIndex, setCurrentIndex] = useState(0);
   const activeTimeRef = useRef(0);
   const lastTickRef = useRef(Date.now());
+  const fetchStartedRef = useRef(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [userAnswers, setUserAnswers] = useState({});
   const [flaggedQuestions, setFlaggedQuestions] = useState({});
@@ -38,6 +40,7 @@ export default function Assessment({
   const [isNavigating, setIsNavigating] = useState(false);
   const [error, setError] = useState(null);
   const [showTimeUpModal, setShowTimeUpModal] = useState(false);
+  const [showSubmitConfirmation, setShowSubmitConfirmation] = useState(false);
 
   useEffect(() => {
     if (preFetchedData && preFetchedData.length > 0 && isLoading) {
@@ -46,8 +49,31 @@ export default function Assessment({
       activeTimeRef.current = 0;
       if (onLoadSuccess) onLoadSuccess(config.duration * 60);
       setIsLoading(false);
+    } else if (!preFetchedData && !loadingAssessment && isLoading) {
+
+      setIsLoading(false);
     }
   }, [preFetchedData, config.duration, onLoadSuccess, isLoading]);
+
+  useEffect(() => {
+
+    if (loadingAssessment) {
+      fetchStartedRef.current = true;
+    }
+  }, [loadingAssessment]);
+
+  useEffect(() => {
+    const hasFetchCompletedOrNeverStarted = !loadingAssessment;
+    const shouldWaitForFetch = loadingAssessment || (!fetchStartedRef.current && !preFetchedData && conceptId);
+
+    if (!isLoading && !shouldWaitForFetch && (!preFetchedData || preFetchedData.length === 0)) {
+      if (conceptId) {
+        navigate(`${ROUTES.LEARNING}?conceptId=${conceptId}`);
+      } else {
+        navigate(ROUTES.CONFIRMATION);
+      }
+    }
+  }, [isLoading, preFetchedData, navigate, conceptId, loadingAssessment]);
 
   useEffect(() => {
     const handleVisibility = () => {
@@ -63,6 +89,7 @@ export default function Assessment({
 
   useEffect(() => {
     if (isTimeUp && !isSubmitted && !isEvaluating) {
+      setShowSubmitConfirmation(false);
       setShowTimeUpModal(true);
     }
   }, [isTimeUp, isSubmitted, isEvaluating]);
@@ -99,7 +126,16 @@ export default function Assessment({
   const allQuestionsAttended = answeredCount === totalQuestions ||
     (answeredCount + Object.keys(flaggedQuestions).length) === totalQuestions;
 
-  const handleSubmit = async () => {
+  const handleSubmitClick = () => {
+    setShowSubmitConfirmation(true);
+  };
+
+  const handleConfirmSubmit = async () => {
+    setShowSubmitConfirmation(false);
+    await performSubmit();
+  };
+
+  const performSubmit = async () => {
     try {
       setShowTimeUpModal(false);
       setIsEvaluating(true);
@@ -110,7 +146,28 @@ export default function Assessment({
 
       saveAssessmentSession(totalActiveTime, isTimeUp);
 
-      const result = await evaluateAssessment(userAnswers, currentQuestion?.concept || null);
+      const conceptStats = {};
+      questions.forEach((q) => {
+        const concept = q.concept || 'General';
+        if (!conceptStats[concept]) {
+          conceptStats[concept] = { total: 0, answered: 0 };
+        }
+        conceptStats[concept].total += 1;
+        if (userAnswers[q.question_id]) {
+          conceptStats[concept].answered += 1;
+        }
+      });
+
+      const conceptBasedAnswerDetails = {};
+      Object.entries(conceptStats).forEach(([concept, stats]) => {
+        conceptBasedAnswerDetails[concept] = {
+          completionTimeTakenSeconds: totalActiveTime,
+          answeredQuestionsCount: stats.answered,
+          unansweredQuestionsCount: stats.total - stats.answered
+        };
+      });
+
+      const result = await evaluateAssessment(userAnswers, conceptBasedAnswerDetails);
 
       if (refreshAppData) {
         await refreshAppData();
@@ -130,6 +187,13 @@ export default function Assessment({
     onAssessmentComplete?.();
     navigate(ROUTES.EVALUATION);
   };
+
+  useEffect(() => {
+    if (conceptId && !questions.length && !isLoading && !isNavigating) {
+      navigate(`${ROUTES.LEARNING}?conceptId=${conceptId}`);
+    }
+  }, [conceptId, questions.length, isLoading, isNavigating, navigate]);
+
   if (isNavigating) return null;
 
   if (isSubmitted || isEvaluating) {
@@ -151,6 +215,10 @@ export default function Assessment({
     );
   }
 
+  if (conceptId && !questions.length && !isLoading) {
+    return null;
+  }
+
   if (error || !questions.length) {
     return (
       <ErrorPage
@@ -169,11 +237,22 @@ export default function Assessment({
 
   return (
     <div className="assessment-layout">
-      <TimeExpiredModal
+      <AssessmentSummaryModal
         isOpen={showTimeUpModal}
+        type="timeExpired"
         attemptedCount={answeredCount}
         totalQuestions={totalQuestions}
-        onConfirm={handleSubmit}
+        markedForReviewCount={Object.keys(flaggedQuestions).length}
+        onConfirm={performSubmit}
+      />
+      <AssessmentSummaryModal
+        isOpen={showSubmitConfirmation}
+        type="submitConfirmation"
+        attemptedCount={answeredCount}
+        totalQuestions={totalQuestions}
+        markedForReviewCount={Object.keys(flaggedQuestions).length}
+        onReview={() => setShowSubmitConfirmation(false)}
+        onSubmit={handleConfirmSubmit}
       />
       <aside className={`assessment-sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}>
         <button className="collapse-btn" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}>
@@ -298,15 +377,15 @@ export default function Assessment({
               onClick={() => setCurrentIndex(Math.min(totalQuestions - 1, currentIndex + 1))}
               disabled={currentIndex >= totalQuestions - 1}
             >
-              Next <span>Question</span>
+              {userAnswers[currentQuestion?.question_id] !== undefined ? 'Next ' : 'Skip '}
+              <span>Question</span>
               <ChevronRight className="nav-icon" />
             </button>
           </div>
           <button
-            className={`btn-submit ${allQuestionsAttended ? 'active' : ''}`}
-            onClick={handleSubmit}
-            disabled={!allQuestionsAttended || isEvaluating}
-            title={allQuestionsAttended ? "Submit now" : "Please answer all questions (answer or flag for review)"}
+            className="btn-submit active"
+            onClick={handleSubmitClick}
+            disabled={isEvaluating}
           >
             {isEvaluating ? 'Submitting...' : 'Submit Assessment'}
           </button>

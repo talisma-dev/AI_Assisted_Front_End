@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Clock, Trophy, ShieldCheck, } from 'lucide-react';
+import { BookOpen, Clock, Trophy, ShieldCheck, Info } from 'lucide-react';
 import { useApp } from '@core/contexts/AppContext';
 import { getTotalTimeSpent, formatTime } from '@core/utils/timeTracker';
 import MicroConcepts from './components/MicroConcepts/MicroConcepts';
 import ErrorPage from '@shared/components/ErrorPage/ErrorPage';
 import Loader from '@shared/components/Loader/Loader';
 import Toast from '@shared/components/UI/Toast/Toast';
-import Celebration from '@shared/components/Celebration/Celebration';
 import './Evaluation.css';
 
 const Evaluation = ({ masteryThreshold, attempts }) => {
   const { performanceData, isLoading, isError, config, refreshAppData } = useApp();
-  const timeTaken = formatTime(getTotalTimeSpent());
+  const overallSeconds = performanceData?.overallTimeTakenSeconds || getTotalTimeSpent();
+  const timeTaken = formatTime(overallSeconds);
   const [allConceptsMastered, setAllConceptsMastered] = useState(false);
   const [showNotification, setShowNotification] = useState(true);
-  const [triggerCelebration, setTriggerCelebration] = useState(false);
   const [totalConceptCount, setTotalConceptCount] = useState(0);
 
   const conceptPerformance = performanceData?.conceptPerformance || [];
@@ -33,19 +32,12 @@ const Evaluation = ({ masteryThreshold, attempts }) => {
     }
   }, [performanceData]);
 
-  useEffect(() => {
-    // Strict check: only trigger if explicitly passed threshold with valid data
-    const shouldCelebrate = hasPassedMasteryThreshold && currentScore > 0 && masteryThreshold > 0;
 
-    if (shouldCelebrate && !triggerCelebration) {
-      const timer = setTimeout(() => {
-        setTriggerCelebration(true);
-      }, 500);
-      return () => clearTimeout(timer);
-    } else if (!shouldCelebrate && triggerCelebration) {
-      setTriggerCelebration(false);
+  useEffect(() => {
+    if (!performanceData && !isLoading && !isError) {
+      refreshAppData();
     }
-  }, [hasPassedMasteryThreshold, triggerCelebration, currentScore, masteryThreshold]);
+  }, [performanceData, isLoading, isError, refreshAppData]);
 
   const getCurrentScoreColor = (score) => {
     if (score >= 95) return 'green';
@@ -54,7 +46,7 @@ const Evaluation = ({ masteryThreshold, attempts }) => {
     return 'red';
   };
 
-  if (isLoading) {
+  if (isLoading || (!performanceData && !isError)) {
     return (
       <Loader
         title="Loading Assessment Results..."
@@ -74,21 +66,9 @@ const Evaluation = ({ masteryThreshold, attempts }) => {
     );
   }
 
-  if (!performanceData) {
-    return (
-      <ErrorPage
-        error="No assessment data found"
-        title="No Assessment Results"
-        message="No assessment results were found. Please complete an assessment first or contact support if you believe this is an error."
-        onRetry={() => window.location.reload()}
-      />
-    );
-  }
-
 
   return (
     <div className="evaluation-page">
-      <Celebration trigger={triggerCelebration} />
       {!hasPassedMasteryThreshold && showNotification && (
         <div className="evaluation-notification-container">
           <div style={{ pointerEvents: 'auto' }}>
@@ -140,7 +120,12 @@ const Evaluation = ({ masteryThreshold, attempts }) => {
               <Trophy className="card-icon" />
             </div>
             <div className="card-info score-info">
-              <span className="card-stat-label">Overall Score</span>
+              <span className="card-stat-label">
+                Overall Score
+                <span className="info-tooltip" data-tooltip="Your overall score across all concepts, measured against the required passing threshold.">
+                  <Info size={14} className="info-icon" />
+                </span>
+              </span>
               <span className={`card-main-stat ${getCurrentScoreColor(currentScore)}`}>{currentScore}%</span>
               <div className="score-bar-wrap">
                 <div className="score-bar-bg">
@@ -162,7 +147,12 @@ const Evaluation = ({ masteryThreshold, attempts }) => {
               <Clock className="card-icon" />
             </div>
             <div className="card-info">
-              <span className="card-stat-label">Completion Time</span>
+              <span className="card-stat-label">
+                Completion Time
+                <span className="info-tooltip" data-tooltip="Total time spent across all attempts for this assessment.">
+                  <Info size={14} className="info-icon" />
+                </span>
+              </span>
               <span className="card-main-stat">{timeTaken}</span>
               <span className="card-subtitle">Assessment duration</span>
             </div>
@@ -174,7 +164,12 @@ const Evaluation = ({ masteryThreshold, attempts }) => {
               <ShieldCheck className="card-icon" />
             </div>
             <div className="card-info">
-              <span className="card-stat-label">Mastered Units</span>
+              <span className="card-stat-label">
+                Mastered Units
+                <span className="info-tooltip" data-tooltip="Number of concepts where the mastery threshold has been achieved">
+                  <Info size={14} className="info-icon" />
+                </span>
+              </span>
               <span className="card-main-stat">{masteredCount} / {conceptPerformance.length}</span>
               <span className="card-subtitle">Core competency reached</span>
             </div>
@@ -186,7 +181,12 @@ const Evaluation = ({ masteryThreshold, attempts }) => {
               <BookOpen className="card-icon" />
             </div>
             <div className="card-info">
-              <span className="card-stat-label">Learn and Grow</span>
+              <span className="card-stat-label">
+                Learn and Grow
+                <span className="info-tooltip" data-tooltip="Concepts that did not meet the mastery threshold and need further review.">
+                  <Info size={14} className="info-icon" />
+                </span>
+              </span>
               <span className="card-main-stat">{learnAndGrowCount}</span>
               <span className="card-subtitle">Concepts to revisit</span>
             </div>

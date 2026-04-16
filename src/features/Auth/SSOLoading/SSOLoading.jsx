@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { setToken, removeToken } from '@api/base';
 import { generateAccessTokenbySSO } from '@api/auth';
+import { clearProfile } from '@core/store/studentProfileSlice';
+import { fetchStudentProfile } from '@core/store/studentProfileActions';
 import Loader from '@shared/components/Loader/Loader';
 import ErrorPage from '@shared/components/ErrorPage/ErrorPage';
-import { AlertTriangle } from 'lucide-react';
-
-import { useApp } from '@core/contexts/AppContext';
 
 const SSOLoading = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { isLoading, performanceData } = useApp();
+  const dispatch = useDispatch();
   const [isProcessing, setIsProcessing] = useState(false);
   const [redirectPath, setRedirectPath] = useState(null);
   const [error, setError] = useState(null);
@@ -21,6 +21,7 @@ const SSOLoading = () => {
     const initializeSSOUser = async () => {
       try {
         removeToken();
+        dispatch(clearProfile());
 
         const verificationToken = searchParams.get('token');
         if (!verificationToken) throw new Error('Authentication failed. Please try again.');
@@ -28,46 +29,17 @@ const SSOLoading = () => {
         setIsProcessing(true);
         authCalledRef.current = true;
 
-        console.log('SSO Token from URL:', verificationToken);
-
         // Step 1: Generate access token using SSO token
         const ssoResponse = await generateAccessTokenbySSO(verificationToken);
-        console.log('SSO Response:', ssoResponse);
 
-        if (!ssoResponse || !ssoResponse?.accessToken || !ssoResponse?.redirectUrl) {
+        if (!ssoResponse?.accessToken || !ssoResponse?.redirectUrl) {
           throw new Error('Authentication failed. Please try again.');
         }
-
-        // Step 2: Set the JWT token and persist GUIDs for later assessment calls
-        setToken(ssoResponse.accessToken);
 
         // Extract IDs from response or fallback to parsing the redirectUrl
         let studentGuid = ssoResponse.studentGuid;
         let courseGuid = ssoResponse.courseGuid;
 
-        if (ssoResponse.redirectUrl) {
-          try {
-            const urlObj = new URL(ssoResponse.redirectUrl.startsWith('http') ? ssoResponse.redirectUrl : window.location.origin + ssoResponse.redirectUrl);
-            studentGuid = studentGuid || urlObj.searchParams.get('student_guid');
-            courseGuid = courseGuid || urlObj.searchParams.get('course_guid');
-          } catch (e) { console.warn('Failed to parse redirectUrl for GUIDs'); }
-        }
-
-        if (studentGuid) localStorage.setItem('student_id', studentGuid);
-        if (courseGuid) localStorage.setItem('course_id', courseGuid);
-        // if (courseGuid) localStorage.setItem('module_id', courseGuid);
-
-        console.log('JWT Token and GUIDs set successfully:', { studentGuid, courseGuid });
-
-        // Reset time tracking for a fresh launch session 
-        try {
-          const { resetTimeData } = await import('@core/utils/timeTracker');
-          resetTimeData();
-        } catch (e) {
-          console.warn('Failed to reset time tracker:', e);
-        }
-
-        // Step 3: Normalize the redirectUrl to stay on localhost 
         let finalPath = ssoResponse.redirectUrl;
         if (finalPath) {
           try {
@@ -75,10 +47,35 @@ const SSOLoading = () => {
               const normalizedLink = finalPath.replace(/^https?:\/([^\/])/, 'https://$1');
               const urlObj = new URL(normalizedLink);
               finalPath = urlObj.pathname + urlObj.search;
+              studentGuid = studentGuid || urlObj.searchParams.get('student_guid');
+              courseGuid = courseGuid || urlObj.searchParams.get('course_guid');
             }
           } catch (e) {
             console.warn('Redirect URL normalization failed, using as-is:', e);
           }
+        }
+
+        const isAssessmentRoute = finalPath === '/assessment' || finalPath === '/confirmation';
+        sessionStorage.setItem('isAssessmentRoute', isAssessmentRoute ? 'true' : 'false');
+
+        setToken(ssoResponse.accessToken, Math.floor(ssoResponse.accessTokenExpiry - (Date.now() / 1000)));
+
+        if (studentGuid) localStorage.setItem('student_id', studentGuid);
+        if (courseGuid) localStorage.setItem('course_id', courseGuid);
+
+        // Fetch student profile immediately after login
+        try {
+          await dispatch(fetchStudentProfile());
+        } catch (profileErr) {
+          console.warn('Failed to fetch student profile after login:', profileErr);
+        }
+
+        // Reset time tracking for a fresh launch session
+        try {
+          const { resetTimeData } = await import('@core/utils/timeTracker');
+          resetTimeData();
+        } catch (e) {
+          console.warn('Failed to reset time tracker:', e);
         }
 
         setRedirectPath(finalPath);
@@ -97,18 +94,10 @@ const SSOLoading = () => {
   }, [searchParams]);
 
   useEffect(() => {
-    if (!isLoading && authCalledRef.current && !isProcessing && !error) {
-      if (redirectPath && redirectPath.includes('/assessment')) {
-        navigate('/confirmation');
-      } else if (redirectPath && redirectPath !== '/') {
+    if (authCalledRef.current && !isProcessing && !error && redirectPath) {
         navigate(redirectPath);
-      } else if (performanceData?.conceptPerformance?.length > 0) {
-        navigate('/evaluation');
-      } else if (performanceData) {
-        navigate('/confirmation');
-      }
     }
-  }, [isLoading, performanceData, navigate, isProcessing, redirectPath, error]);
+  }, [navigate, isProcessing, redirectPath, error]);
 
   if (error) {
     return (
