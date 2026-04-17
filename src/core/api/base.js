@@ -6,9 +6,13 @@ export const setToken = (token,expiry) => {
 };
 
 export const getToken = () => {
+ try {
   const cookies = document.cookie.split(';');
   const tokenCookie = cookies.find(c => c.trim().startsWith('jwt_token='));
-  return tokenCookie ? tokenCookie.split('=')[1] : null;
+  return tokenCookie ? tokenCookie.split('=').slice(1).join('=').trim() : null;
+  } catch {
+    return null;
+  }
 };
 
 export const removeToken = () => {
@@ -34,31 +38,65 @@ export const isTokenValid = () => {
   }
 };
 
-export const getAuthHeaders = () => {
+export const hasStorageAccess = async () => {
+  if (!document.hasStorageAccess) return true;
+  try {
+    return await document.hasStorageAccess();
+  } catch {
+    return false;
+  }
+};
+
+export const requestStorageAccess = async () => {
+  if (!document.requestStorageAccess) return true;
+  try {
+    await document.requestStorageAccess();
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+
+export const bootstrapAuth = async () => {
+  const hasAccess = await hasStorageAccess();
+
+  if (!hasAccess) {
+    return { status: 'needs-user-action' };
+  }
+
+  if (!isTokenValid()) {
+    return { status: 'invalid-token' };
+  }
+
+  return { status: 'ready' };
+};
+
+export const getAuthHeaders = (options = {}) => {
   const token = getToken();
+  const isFormData = options.body instanceof FormData;
   return {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    ...(token && { 'Authorization': `Bearer ${token}` })
+    Accept: 'application/json',
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+    ...(token && { Authorization: `Bearer ${token}` }),
   };
 };
 
 export const apiFetch = async (endpoint, options = {}) => {
+  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
   const headers = {
-    ...getAuthHeaders(),
+    ...getAuthHeaders(options),
     ...options.headers,
   };
-
-  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
-  
-
-  
   const response = await fetch(url, {
     ...options,
     headers,
   });
 
 
+  if (response.status === 401 && !getToken()) {
+    window.dispatchEvent(new CustomEvent('auth-needs-user-action'));
+  }
 
   if (!response.ok) {
     const contentType = response.headers.get('content-type');
@@ -68,25 +106,19 @@ export const apiFetch = async (endpoint, options = {}) => {
       errorBody = await response.json().catch(() => ({}));
     } else {
       const text = await response.text();
-      if (text.includes('<!DOCTYPE') || text.includes('import') || text.includes('export')) {
-        console.error('API Error: Received HTML/file content instead of JSON. Check API_BASE_URL configuration.');
-        errorBody = { message: 'Invalid API endpoint - receiving file content instead of JSON' };
-      } else {
         errorBody = { message: text.substring(0, 200) };
       }
+
+    if (response.status === 401) {
+      removeToken();
+      window.dispatchEvent(
+        new CustomEvent('auth-error', { detail: { type: 'unauthorized' } }));
     }
-    
-    const error = {
+    throw {
       status: response.status,
       message: errorBody.message || 'API Request failed',
       data: errorBody
     };
-    if (response.status === 401) {
-      removeToken();
-      window.dispatchEvent(new CustomEvent('auth-error', { detail: { type: 'unauthorized' } }));
-    }
-
-    throw error;
   }
 
   const contentType = response.headers.get('content-type');

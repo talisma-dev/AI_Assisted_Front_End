@@ -7,6 +7,7 @@ import { useTimer } from '@core/hooks/useTimer';
 import { useToast } from '@core/hooks/useToast';
 import { useAssessmentFetch } from '@core/hooks/useAssessmentFetch';
 import { logout } from '@core/utils/logout';
+import { bootstrapAuth, requestStorageAccess } from '@api/base';
 import MainLayout from '@shared/layouts/MainLayout';
 import Loader from '@shared/components/Loader/Loader';
 import ConfirmationModal from '@shared/components/ConfirmationModal/ConfirmationModal';
@@ -62,6 +63,7 @@ function AppContent() {
 
   const [isTimeUp, setIsTimeUp] = useState(false);
   const { toasts, addToast, removeToast } = useToast();
+  const [needsUserAction, setNeedsUserAction] = useState(false);
 
   // Update currentConceptId when URL changes
   useEffect(() => {
@@ -70,6 +72,27 @@ function AppContent() {
       setCurrentConceptId(newConceptId);
     }
   }, [location.search]);
+
+  // Check auth on app load - handles Safari iframe storage access
+  useEffect(() => {
+    const initAuth = async () => {
+    const publicRoutes = ['/sso', '/direct', '/lms', '/'];
+    const isPublic = publicRoutes.some(r => location.pathname === r || location.pathname.startsWith(r + '/'));
+      if (isPublic) return;
+     
+      const result = await bootstrapAuth();
+  
+          if (result.status === 'needs-user-action') {
+            setNeedsUserAction(true);
+            } else if (result.status === 'invalid-token') {
+             navigate('/sso', { replace: true });
+          }
+            };
+   
+    initAuth();
+    }, [navigate, location.pathname]);
+
+
 
   // Multi-tab sync: listen for logout events from other tabs
   useEffect(() => {
@@ -82,15 +105,32 @@ function AppContent() {
         navigate('/sso', { replace: true });
       }
     };
+ 
+   const handleNeedsUserAction = () => {
+      setNeedsUserAction(true);
+ };
 
     window.addEventListener('token-removed', handleTokenRemoved);
     window.addEventListener('auth-error', handleAuthError);
+    window.addEventListener('auth-needs-user-action', handleNeedsUserAction);
 
     return () => {
       window.removeEventListener('token-removed', handleTokenRemoved);
       window.removeEventListener('auth-error', handleAuthError);
+      window.removeEventListener('auth-needs-user-action', handleNeedsUserAction);
     };
   }, [navigate]);
+  
+  // Handler for Safari storage access user gesture
+  const handleContinue = async () => {
+  const granted = await requestStorageAccess();
+   if (granted) {
+    setNeedsUserAction(false);
+    window.location.reload();
+   }
+  };
+
+
 
   const handleTimeUp = useCallback(() => {
     setAssessmentStarted(false);
@@ -141,6 +181,21 @@ function AppContent() {
     setAssessmentStarted(false);
     setHasAssessmentQuestions(false);
   }, []);
+
+
+
+  // Storage access gate - Safari iframe requires user gesture
+  if (needsUserAction) {
+    return (
+      <ErrorPage
+        title="Continue to Learning Platform"
+        message="Click below to access your session"
+        showRetry={true}
+        onRetry={handleContinue}
+        retryLabel="Continue"
+      />
+    );
+  }
 
   return (
     <MainLayout

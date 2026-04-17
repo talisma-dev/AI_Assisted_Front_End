@@ -13,6 +13,8 @@ const MicroConcepts = ({ attempts, conceptPerformance = [], buttonTexts = {}, on
   const buttonRefs = useRef({});
 
   const handleContinueLearning = (concept) => {
+    // Clear assessment-submitted flag when starting a new learning session
+    sessionStorage.removeItem('assessment-submitted');
     navigate(`/learning/${encodeURIComponent(concept.name)}`, {
       state: { triggerContentLoad: true }
     });
