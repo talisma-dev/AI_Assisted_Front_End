@@ -12,4 +12,7 @@ export const API_ENDPOINTS = {
     GENERATE_ASSESSMENT: '/api/utility/generateAssessment',
     UPDATE_ASSESSMENT_DETAILS: '/api/utility/updateAssessmentDetails',
   },
+  STUDENT: {
+    PROFILE_CONFIGURATION: '/api/student/profile/configuration',
+  },
 };

@@ -1,7 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit';
+import studentProfileReducer from './studentProfileSlice';
 
 export const store = configureStore({
   reducer: {
-    // Add reducers here as you create slices
+    studentProfile: studentProfileReducer,
   },
 });

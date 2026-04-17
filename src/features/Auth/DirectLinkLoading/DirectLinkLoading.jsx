@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { setToken } from '@api/base';
+import { useDispatch } from 'react-redux';
+import { setToken, removeToken } from '@api/base';
 import { generateJWTToken } from '@api/auth';
+import { fetchStudentProfile } from '@core/store/studentProfileActions';
+import { clearProfile } from '@core/store/studentProfileSlice';
 import { useApp } from '@core/contexts/AppContext';
 import { ROUTES } from '@core/constants/routes';
 import Loader from '@shared/components/Loader/Loader';
@@ -10,6 +13,7 @@ import ErrorPage from '@shared/components/ErrorPage/ErrorPage';
 const DirectLinkLoading = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { isLoading, performanceData, isError } = useApp();
   const [error, setError] = useState(null);
   const authCalledRef = React.useRef(false);
@@ -17,7 +21,6 @@ const DirectLinkLoading = () => {
   useEffect(() => {
     const initializeDirectLinkUser = async () => {
       try {
-        console.log('URL Search Params:', Object.fromEntries(searchParams));
 
         let studentGuid = searchParams.get('student_guid') || searchParams.get('student_id') || searchParams.get('studentId');
         let courseGuid = searchParams.get('course_guid') || searchParams.get('course_id') || searchParams.get('courseId');
@@ -27,21 +30,14 @@ const DirectLinkLoading = () => {
         }
 
         authCalledRef.current = true;
+        removeToken();
+        dispatch(clearProfile());
 
         // Persist GUIDs for assessment payloads
         if (studentGuid) localStorage.setItem('student_id', studentGuid);
         if (courseGuid) localStorage.setItem('course_id', courseGuid);
         if (courseGuid) localStorage.setItem('module_id', courseGuid);
 
-        // Reset time tracking for a fresh launch session 
-        try {
-          const { resetTimeData } = await import('@core/utils/timeTracker');
-          resetTimeData();
-        } catch (e) {
-          console.warn('Failed to reset time tracker:', e);
-        }
-
-        // Use token from URL if present; otherwise mint it using backend 
         const tokenFromUrl = searchParams.get('token');
         if (tokenFromUrl) {
           setToken(tokenFromUrl);
@@ -49,6 +45,21 @@ const DirectLinkLoading = () => {
           const token = await generateJWTToken(studentGuid, courseGuid);
           if (!token) throw new Error('Authentication failed. Please try again.');
           setToken(token);
+        }
+
+        // Fetch student profile immediately after login
+        try {
+          await dispatch(fetchStudentProfile());
+          } catch (profileErr) {
+          console.warn('Failed to fetch student profile after DirectLink login:', profileErr);
+        }
+
+        // Reset time tracking for a fresh launch session
+        try {
+          const { resetTimeData } = await import('@core/utils/timeTracker');
+          resetTimeData();
+        } catch (e) {
+          console.warn('Failed to reset time tracker:', e);
         }
       } catch (err) {
         console.error('Error initializing Direct Link user:', err);
@@ -59,17 +70,14 @@ const DirectLinkLoading = () => {
     if (!authCalledRef.current) {
       initializeDirectLinkUser();
     }
-  }, [searchParams]);
+  }, [searchParams, dispatch]);
 
   // Navigate once AppContext is ready
   useEffect(() => {
-    // Condition check: once we've at least STARTED auth, and AppContext is done loading
     if (!isLoading && authCalledRef.current && !error) {
       if (performanceData?.conceptPerformance?.length > 0) {
-        console.log('User has existing scores, navigating to evaluation');
         navigate(ROUTES.EVALUATION);
       } else if (performanceData) {
-        console.log('No existing scores (conceptPerformance empty or null), navigating to confirmation');
         navigate(ROUTES.CONFIRMATION);
       }
     }

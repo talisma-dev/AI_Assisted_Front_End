@@ -9,7 +9,8 @@ const ErrorPage = ({
   title = "Something went wrong",
   message = "An unexpected error occurred. Please try again or contact support if the problem persists.",
   showRetry = true,
-  useModal = false
+  useModal = false,
+  retryLabel = "Try Again"
 }) => {
   const handleRetry = () => {
     if (onRetry) {
@@ -84,7 +85,7 @@ const ErrorPage = ({
             onClick={handleRetry}
           >
             <RefreshCw className="button-icon" />
-            Try Again
+            {retryLabel}
           </button>
         </div>
       )}

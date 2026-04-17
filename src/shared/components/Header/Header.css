@@ -27,6 +27,15 @@
   width: 26px;
   height: 26px;
   color: var(--accent);
+  flex-shrink: 0;
+}
+
+.course-title-text {
+  max-width: 500px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
 }
 
 .header-right .header-actions {
@@ -120,6 +129,11 @@
   font-size: 14px;
   font-weight: 700;
   color: var(--text-main);
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
 }
 
 .user-role {

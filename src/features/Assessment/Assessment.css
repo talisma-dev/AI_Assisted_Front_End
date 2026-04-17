@@ -57,8 +57,8 @@
   flex-direction: column;
   align-items: center;
   position: absolute;
-  top: 180px;    
-  bottom: 95px;  
+  top: 120px;
+  bottom: 120px;
   left: 0;
   right: 0;
   padding: 0 20px;
@@ -141,6 +141,29 @@
 .progress-percentage-main { font-size: 13px; font-weight: 800; color: var(--accent); text-align: center; }
 .progress-text { font-size: 7px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; text-align: center; }
 
+.legend-collapsed {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg-white);
+  border: 1px solid var(--border-main);
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
+  padding: 10px 8px;
+  width: 100%;
+  flex-shrink: 0;
+}
+.legend-item-collapsed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.legend-item-collapsed .status-dot { width: 8px; height: 8px; }
+
 .sidebar-content {
   display: flex;
   flex-direction: column;
@@ -206,6 +229,7 @@
 .nav-item.current  { background: var(--accent);  color: white; border-color: var(--accent); }
 .nav-item.answered { background: var(--success);  color: white; border-color: var(--success); }
 .nav-item.flagged  { border-color: var(--warning); color: var(--warning); }
+.nav-item.answered.flagged { color: white; border-color: var(--warning); }
 
 .sidebar-footer {
   margin-top: auto;
@@ -374,7 +398,7 @@
   .assessment-layout { margin-top: var(--header-height-mobile); height: calc(100vh - var(--header-height-mobile)); }
   .assessment-sidebar { width: 300px; padding: 16px; }
   .assessment-sidebar.collapsed { width: 72px; padding: 16px 8px; }
-  .progress-indicator-collapsed { top: 150px; bottom: 80px; padding: 0 12px; }
+  .progress-indicator-collapsed { top: 100px; bottom: 100px; padding: 0 12px; }
   .assessment-main { padding: 24px 32px; }
   .assessment-sidebar.collapsed + .assessment-main { padding: 24px 48px; }
   .header-left h1 { font-size: 26px; }

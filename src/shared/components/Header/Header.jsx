@@ -2,6 +2,7 @@ import React from 'react';
 import { GraduationCap, Clock, User, BarChart3, SquareKanban } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 // import ThemePicker from '../ThemePicker/ThemePicker';
+import { truncateText, TRUNCATION_CONFIG } from '@core/utils/textUtils';
 import './Header.css';
 
 const Header = ({ showTimer, timeLeft, totalTime, formatTime,courseTitle,userName,userRole }) => {
@@ -29,7 +30,9 @@ const Header = ({ showTimer, timeLeft, totalTime, formatTime,courseTitle,userNam
       <div className="header-left">
         <div className="course-title">
           <GraduationCap className="graduation-cap" />
-          <span>{courseTitle}</span>
+          <span className="course-title-text" title={courseTitle}>
+            {truncateText(courseTitle, TRUNCATION_CONFIG.COURSE_NAME_MAX_LENGTH)}
+          </span>
         </div>
       </div>
 
@@ -58,7 +61,7 @@ const Header = ({ showTimer, timeLeft, totalTime, formatTime,courseTitle,userNam
             <button
               className="report-nav-btn"
               onClick={handleEvaluationClick}
-              title="View Evaluation"
+              title="View Assessment Analysis"
             >
               <SquareKanban className="report-nav-icon" />
             </button>
@@ -67,7 +70,7 @@ const Header = ({ showTimer, timeLeft, totalTime, formatTime,courseTitle,userNam
 
           <div className="user-profile-wrapper">
             <div className="user-text">
-              <span className="user-name">{userName}</span>
+              <span className="user-name" title={userName}>{truncateText(userName, TRUNCATION_CONFIG.STUDENT_NAME_MAX_LENGTH)}</span>
               <span className="user-role">{userRole}</span>
             </div>
             <div className="user-avatar">

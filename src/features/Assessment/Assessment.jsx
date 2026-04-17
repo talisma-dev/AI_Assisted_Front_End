@@ -10,10 +10,9 @@ import { useApp } from '@core/contexts/AppContext';
 import './Assessment.css';
 import Loader from '@shared/components/Loader/Loader';
 import ErrorPage from '@shared/components/ErrorPage/ErrorPage';
-import TimeExpiredModal from './components/TimeExpiredModal/TimeExpiredModal';
+import AssessmentSummaryModal from './components/AssessmentSummaryModal/AssessmentSummaryModal';
 
 export default function Assessment({
-  questionsCount,
   onAssessmentComplete,
   onAssessmentSubmit,
   conceptId,
@@ -21,6 +20,7 @@ export default function Assessment({
   onLoadError,
   onLoadSuccess,
   preFetchedData,
+  loadingAssessment,
   isTimeUp
 }) {
   const navigate = useNavigate();
@@ -31,6 +31,7 @@ export default function Assessment({
   const [currentIndex, setCurrentIndex] = useState(0);
   const activeTimeRef = useRef(0);
   const lastTickRef = useRef(Date.now());
+  const fetchStartedRef = useRef(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [userAnswers, setUserAnswers] = useState({});
   const [flaggedQuestions, setFlaggedQuestions] = useState({});
@@ -39,19 +40,47 @@ export default function Assessment({
   const [isNavigating, setIsNavigating] = useState(false);
   const [error, setError] = useState(null);
   const [showTimeUpModal, setShowTimeUpModal] = useState(false);
+  const [showSubmitConfirmation, setShowSubmitConfirmation] = useState(false);
 
-  // Use pre-fetched data from AppContext
+  // Check if already submitted this session - prevent retaking
   useEffect(() => {
-    if (preFetchedData && preFetchedData.length > 0) {
+    const alreadySubmitted = sessionStorage.getItem('assessment-submitted');
+    if (alreadySubmitted === 'true') {
+      navigate(ROUTES.EVALUATION, { replace: true });
+      return;
+    }
+
+    if (preFetchedData && preFetchedData.length > 0 && isLoading) {
       setQuestions(preFetchedData);
       lastTickRef.current = Date.now();
       activeTimeRef.current = 0;
       if (onLoadSuccess) onLoadSuccess(config.duration * 60);
       setIsLoading(false);
+    } else if (!preFetchedData && !loadingAssessment && isLoading) {
+      setIsLoading(false);
     }
-  }, [preFetchedData, config.duration, onLoadSuccess]);
+  }, [preFetchedData, config.duration, onLoadSuccess, isLoading, navigate]);
 
-  // Track active time only when tab is visible
+  useEffect(() => {
+
+    if (loadingAssessment) {
+      fetchStartedRef.current = true;
+    }
+  }, [loadingAssessment]);
+
+  useEffect(() => {
+    const hasFetchCompletedOrNeverStarted = !loadingAssessment;
+    const shouldWaitForFetch = loadingAssessment || (!fetchStartedRef.current && !preFetchedData && conceptId);
+
+    if (!isLoading && !shouldWaitForFetch && (!preFetchedData || preFetchedData.length === 0)) {
+      if (conceptId) {
+        navigate(`${ROUTES.LEARNING}?conceptId=${conceptId}`);
+      } else {
+        navigate(ROUTES.CONFIRMATION);
+      }
+    }
+  }, [isLoading, preFetchedData, navigate, conceptId, loadingAssessment]);
+
   useEffect(() => {
     const handleVisibility = () => {
       if (document.hidden) {
@@ -64,9 +93,9 @@ export default function Assessment({
     return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, []);
 
-  // Handle automatic submission trigger when time is up
   useEffect(() => {
     if (isTimeUp && !isSubmitted && !isEvaluating) {
+      setShowSubmitConfirmation(false);
       setShowTimeUpModal(true);
     }
   }, [isTimeUp, isSubmitted, isEvaluating]);
@@ -74,6 +103,9 @@ export default function Assessment({
   const currentQuestion = questions[currentIndex];
   const totalQuestions = questions.length;
   const answeredCount = Object.keys(userAnswers).length;
+  const flaggedCount = Object.keys(flaggedQuestions).length;
+  const flaggedOnlyCount = Object.keys(flaggedQuestions).filter(id => userAnswers[id] === undefined).length;
+  const notVisitedCount = totalQuestions - answeredCount - flaggedOnlyCount;
   const progressPercentage = totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
 
   const toggleFlag = () => {
@@ -94,29 +126,66 @@ export default function Assessment({
 
   const selectOption = (option) => {
     if (!currentQuestion) return;
+    const currentAnswer = userAnswers[currentQuestion.question_id];
+    if (currentAnswer === option) {
+      setUserAnswers(prev => {
+        const { [currentQuestion.question_id]: removed, ...rest } = prev;
+        return rest;
+      });
+    } else {
     setUserAnswers(prev => ({
       ...prev,
       [currentQuestion.question_id]: option
     }));
+    }
   };
 
-  // Check if all questions are attended (answered or flagged)
   const allQuestionsAttended = answeredCount === totalQuestions ||
     (answeredCount + Object.keys(flaggedQuestions).length) === totalQuestions;
 
-  const handleSubmit = async () => {
+  const handleSubmitClick = () => {
+    setShowSubmitConfirmation(true);
+  };
+
+  const handleConfirmSubmit = async () => {
+    setShowSubmitConfirmation(false);
+    await performSubmit();
+  };
+
+  const performSubmit = async () => {
     try {
       setShowTimeUpModal(false);
       setIsEvaluating(true);
+      sessionStorage.setItem('assessment-submitted', 'true');
       if (onAssessmentSubmit) onAssessmentSubmit();
 
-      // Calculate final active time (adding the current active segment)
       const currentSegment = Math.floor((Date.now() - lastTickRef.current) / 1000);
       const totalActiveTime = activeTimeRef.current + currentSegment;
 
       saveAssessmentSession(totalActiveTime, isTimeUp);
 
-      const result = await evaluateAssessment(userAnswers, currentQuestion?.concept || null);
+      const conceptStats = {};
+      questions.forEach((q) => {
+        const concept = q.concept || 'General';
+        if (!conceptStats[concept]) {
+          conceptStats[concept] = { total: 0, answered: 0 };
+        }
+        conceptStats[concept].total += 1;
+        if (userAnswers[q.question_id]) {
+          conceptStats[concept].answered += 1;
+        }
+      });
+
+      const conceptBasedAnswerDetails = {};
+      Object.entries(conceptStats).forEach(([concept, stats]) => {
+        conceptBasedAnswerDetails[concept] = {
+          completionTimeTakenSeconds: totalActiveTime,
+          answeredQuestionsCount: stats.answered,
+          unansweredQuestionsCount: stats.total - stats.answered
+        };
+      });
+
+      const result = await evaluateAssessment(userAnswers, conceptBasedAnswerDetails);
 
       if (refreshAppData) {
         await refreshAppData();
@@ -133,9 +202,21 @@ export default function Assessment({
 
   const handleAnalysisComplete = () => {
     setIsNavigating(true);
+    setQuestions([]); 
     onAssessmentComplete?.();
-    navigate(ROUTES.EVALUATION);
+    navigate(ROUTES.EVALUATION, { replace: true });
   };
+
+  useEffect(() => {
+    if (!questions.length && isSubmitted && !isNavigating) {
+      navigate(ROUTES.EVALUATION, { replace: true });
+      return;
+    }
+    if (conceptId && !questions.length && !isLoading && !isNavigating && !isSubmitted) {
+      navigate(`${ROUTES.LEARNING}?conceptId=${conceptId}`);
+    }
+  }, [conceptId, questions.length, isLoading, isNavigating, navigate, isSubmitted]);
+
   if (isNavigating) return null;
 
   if (isSubmitted || isEvaluating) {
@@ -157,6 +238,10 @@ export default function Assessment({
     );
   }
 
+  if (conceptId && !questions.length && !isLoading) {
+    return null;
+  }
+
   if (error || !questions.length) {
     return (
       <ErrorPage
@@ -175,11 +260,22 @@ export default function Assessment({
 
   return (
     <div className="assessment-layout">
-      <TimeExpiredModal
+      <AssessmentSummaryModal
         isOpen={showTimeUpModal}
+        type="timeExpired"
         attemptedCount={answeredCount}
         totalQuestions={totalQuestions}
-        onConfirm={handleSubmit}
+        markedForReviewCount={Object.keys(flaggedQuestions).length}
+        onConfirm={performSubmit}
+      />
+      <AssessmentSummaryModal
+        isOpen={showSubmitConfirmation}
+        type="submitConfirmation"
+        attemptedCount={answeredCount}
+        totalQuestions={totalQuestions}
+        markedForReviewCount={Object.keys(flaggedQuestions).length}
+        onReview={() => setShowSubmitConfirmation(false)}
+        onSubmit={handleConfirmSubmit}
       />
       <aside className={`assessment-sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}>
         <button className="collapse-btn" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}>
@@ -209,6 +305,11 @@ export default function Assessment({
               <div className="progress-text">Complete</div>
             </div>
           </div>
+          <div className="legend-collapsed">
+            <div className="legend-item-collapsed"><span className="status-dot answered" /> {answeredCount}</div>
+            <div className="legend-item-collapsed"><span className="status-dot flagged" /> {flaggedCount}</div>
+            <div className="legend-item-collapsed"><span className="status-dot not-visited" /> {notVisitedCount}</div>
+          </div>
         </div>
 
         <div className="sidebar-content">
@@ -221,15 +322,15 @@ export default function Assessment({
             <div className="navigation-grid-container">
               <div className="navigation-grid">
                 {questions.map((q, idx) => {
-                  let statusClass = '';
-                  if (idx === currentIndex) statusClass = 'current';
-                  else if (userAnswers[q.question_id] !== undefined) statusClass = 'answered';
-                  else if (flaggedQuestions[q.question_id]) statusClass = 'flagged';
+                  const statusClasses = [];
+                  if (idx === currentIndex) statusClasses.push('current');
+                  if (userAnswers[q.question_id] !== undefined) statusClasses.push('answered');
+                  if (flaggedQuestions[q.question_id]) statusClasses.push('flagged');
 
                   return (
                     <div
                       key={q.question_id}
-                      className={`nav-item ${statusClass}`}
+                      className={`nav-item ${statusClasses.join(' ')}`}
                       onClick={() => setCurrentIndex(idx)}
                     >
                       {idx + 1}
@@ -249,9 +350,9 @@ export default function Assessment({
               <div className="progress-bar-fill" style={{ width: `${progressPercentage}%` }} />
             </div>
             <div className="legend">
-              <div className="legend-item"><span className="status-dot answered" /> ANSWERED</div>
-              <div className="legend-item"><span className="status-dot flagged" /> FOR REVIEW</div>
-              <div className="legend-item"><span className="status-dot not-visited" /> NOT VISITED</div>
+              <div className="legend-item"><span className="status-dot answered" /> ANSWERED ({answeredCount})</div>
+              <div className="legend-item"><span className="status-dot flagged" /> FOR REVIEW ({flaggedCount})</div>
+              <div className="legend-item"><span className="status-dot not-visited" /> NOT VISITED ({notVisitedCount})</div>
             </div>
           </div>
         </div>
@@ -304,15 +405,15 @@ export default function Assessment({
               onClick={() => setCurrentIndex(Math.min(totalQuestions - 1, currentIndex + 1))}
               disabled={currentIndex >= totalQuestions - 1}
             >
-              Next <span>Question</span>
+              {userAnswers[currentQuestion?.question_id] !== undefined ? 'Next ' : 'Skip '}
+              <span>Question</span>
               <ChevronRight className="nav-icon" />
             </button>
           </div>
           <button
-            className={`btn-submit ${allQuestionsAttended ? 'active' : ''}`}
-            onClick={handleSubmit}
-            disabled={!allQuestionsAttended || isEvaluating}
-            title={allQuestionsAttended ? "Submit now" : "Please answer all questions (answer or flag for review)"}
+            className="btn-submit active"
+            onClick={handleSubmitClick}
+            disabled={isEvaluating}
           >
             {isEvaluating ? 'Submitting...' : 'Submit Assessment'}
           </button>
@@ -321,5 +422,3 @@ export default function Assessment({
     </div>
   );
 }
-
-// Remove standalone export

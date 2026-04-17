@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { BadgeCheck, ChevronDown, ChevronUp, BookOpen } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, BookOpen } from 'lucide-react';
 import Modal from '../UI/Modal/Modal';
 import './ConfirmationModal.css';
 
-const ConfirmationModal = ({ onConfirm, isOpen, showTimer, duration, masteryThreshold, attempts, overview }) => {
+const ConfirmationModal = ({ onConfirm, isOpen, showTimer, duration, masteryThreshold, attempts, overview, assessmentData }) => {
   const [isChecked, setIsChecked] = useState(false);
   const [isBeforeYouBeginExpanded, setIsBeforeYouBeginExpanded] = useState(true);
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(false);
@@ -25,7 +25,7 @@ const ConfirmationModal = ({ onConfirm, isOpen, showTimer, duration, masteryThre
 
           <ul className="confirmation-list">
             <li className="confirmation-item">
-              This Assessment evaluates your understanding of all <strong>Learning Objectives</strong> in this Unit.
+              This Assessment evaluates your understanding of all <strong>Learning Concepts</strong> in this Unit.
             </li>
 
             {showTimer ? (
@@ -37,7 +37,7 @@ const ConfirmationModal = ({ onConfirm, isOpen, showTimer, duration, masteryThre
                   A score of <strong>{masteryThreshold}% or higher</strong> is required to achieve Mastery.
                 </li>
                 <li className="confirmation-item">
-                  The timer will start once you click <strong>"Agree & Start Assessment"</strong>.
+                  The timer will start once you click <strong>"Agree & Start Assessment"</strong>.Note that any question left blank will be incorrect and marked as unanswered.
                 </li>
                 <li className="confirmation-item">
                   The quiz will be <strong>automatically submitted when the timer expires</strong>.
@@ -64,13 +64,21 @@ const ConfirmationModal = ({ onConfirm, isOpen, showTimer, duration, masteryThre
             )}
 
             <li className="confirmation-item">
+              You can mark a question for review and return to it later before submitting the test. If you do not revisit the question, your originally selected answer will be submitted.
+            </li>
+
+            <li className="confirmation-item">
               Please do not <strong>close or refresh</strong> the page while the assessment is loading.
             </li>
           </ul>
         </div>
 
-        {/* Assessment Overview - Expandable Section (only show if overview data provided) */}
-        {overview?.concepts?.length > 0 && (
+        {/* Assessment Overview - Expandable Section (only show if concepts available) */}
+      {(() => {
+        const concepts = Array.isArray(assessmentData)
+          ? [...new Set(assessmentData.map(q => q.concept).filter(Boolean))]
+          : [];
+        return concepts.length > 0 ? (
           <div className="confirmation-section">
             <button
               className="section-toggle"
@@ -86,15 +94,15 @@ const ConfirmationModal = ({ onConfirm, isOpen, showTimer, duration, masteryThre
 
             {isOverviewExpanded && (
               <div className="overview-content">
-                <p className="overview-description">You will be assessed over the following <strong>{overview.concepts.length} concepts</strong>:</p>
+                <p className="overview-description">You will be assessed over the following <strong>{concepts.length} concept{concepts.length > 1 ? 's' : ''}</strong>:</p>
                 <div className="concepts-outer-box">
                   <div className="concepts-grid">
-                    {overview.concepts.map((concept) => (
-                      <div key={concept.id} className="concept-card">
+                    {concepts.map((concept, index) => (
+                      <div key={index} className="concept-card">
                         <div className="concept-icon-wrapper">
                           <BookOpen className="concept-icon" />
                         </div>
-                        <span className="concept-name">{concept.name}</span>
+                        <span className="concept-name">{concept}</span>
                       </div>
                     ))}
                   </div>
@@ -102,14 +110,15 @@ const ConfirmationModal = ({ onConfirm, isOpen, showTimer, duration, masteryThre
               </div>
             )}
           </div>
-        )}
+          ) : null;
+        })()}
 
         <div
           className={`acknowledgement-box ${isChecked ? 'checked' : ''}`}
           onClick={() => setIsChecked(!isChecked)}
         >
           <div className="custom-checkbox">
-            <BadgeCheck className="checkbox-check" />
+            <Check className="checkbox-check" />
           </div>
           <span className="acknowledgement-text">
             I have read and understood the assessment information above
