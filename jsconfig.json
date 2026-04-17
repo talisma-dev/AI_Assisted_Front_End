@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@core/*": ["./src/core/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@features/*": ["./src/features/*"],
+      "@api/*": ["./src/core/api/*"]
+    }
+  }
+}

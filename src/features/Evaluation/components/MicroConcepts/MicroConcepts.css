@@ -1,0 +1,550 @@
+/* ── MicroConcepts Grid ── */
+.concepts-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  width: 100%;
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.concepts-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.concepts-grid::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.concepts-grid::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.concepts-grid::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.concepts-grid-no-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.concepts-grid-no-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Concept Card ── */
+.concept-card {
+  background: linear-gradient(145deg, #fff 0%, #f8fafc 100%);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 24px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 10px 20px -5px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  min-height: 360px;
+  max-width: 500px;
+  position: relative;
+}
+
+/* Info Icon Button */
+.concept-info-wrapper {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  z-index: 10;
+}
+
+.concept-info-btn {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.concept-info-btn:hover {
+  background: var(--accent-bg);
+}
+
+.concept-info-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
+}
+
+/* Info Popup */
+.concept-info-popup {
+  position: fixed;
+  background: #fff;
+  border: 1px solid var(--accent-border);
+  border-radius: 12px;
+  padding: 12px 16px 16px 16px;
+  min-width: 280px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  z-index: 2147483647;
+}
+
+.concept-popup-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  transition: all 0.2s ease;
+}
+
+.concept-popup-close:hover {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.concept-popup-content {
+  padding: 0;
+}
+
+.popup-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 10px 0;
+  text-align: center;
+}
+
+.popup-data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.popup-header-row th {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--accent-border);
+  text-align: center;
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.popup-header-row th:first-child {
+  text-align: left;
+  padding-left: 0;
+}
+
+.popup-header-row th:last-child {
+  padding-right: 0;
+}
+
+.popup-data-row td {
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #1e293b;
+  font-weight: 600;
+  text-align: center;
+}
+
+.popup-data-row td:first-child {
+  text-align: left;
+  padding-left: 0;
+  color: var(--accent);
+}
+
+.popup-data-row td:last-child {
+  padding-right: 0;
+}
+
+.popup-attempt-num {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.popup-no-data {
+  text-align: center;
+  color: #94a3b8;
+  font-weight: 500;
+  padding: 12px 0;
+}
+
+.concept-popup-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 24px 12px 0;
+  line-height: 1.3;
+}
+
+.concept-popup-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.popup-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.popup-stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.popup-stat-label {
+  font-size: 11px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.concept-popup-desc {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.concept-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 30px color-mix(in srgb, var(--accent) 15%, transparent), 0 12px 24px -8px rgba(0, 0, 0, 0.1);
+}
+
+.concept-card-top {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  gap: 20px;
+}
+
+/* Stats Bar */
+.concept-stats-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  border: 1px solid var(--accent-border);
+  border-radius: 16px;
+  padding: 12px 24px;
+  flex: 1;
+  justify-content: space-around;
+}
+
+.concept-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+}
+
+.concept-stat-divider {
+  width: 1px;
+  height: 32px;
+  background: #e2e8f0;
+}
+
+/* Circle progress */
+.concept-circle-wrapper {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.concept-circle-svg {
+  width: 96px;
+  height: 96px;
+  position: absolute;
+  transform: rotate(-90deg);
+}
+
+.concept-circle-svg circle:first-child {
+  stroke: #e2e8f0;
+  stroke-width: 6;
+}
+
+.concept-circle-svg circle:last-child {
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.concept-circle-svg circle.green {
+  stroke: #10b981;
+}
+
+.concept-circle-svg circle.amber {
+  stroke: #f59e0b;
+}
+
+.concept-circle-svg circle.red {
+  stroke: #ef4444;
+}
+
+.concept-circle-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.concept-circle-text.green-text {
+  color: #10b981;
+}
+
+.concept-circle-text.amber-text {
+  color: #f59e0b;
+}
+
+.concept-circle-text.red-text {
+  color: #ef4444;
+}
+
+/* Badge */
+.attempts-badge {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 8px 20px;
+  border-radius: 100px;
+  text-transform: uppercase;
+  border: 1px solid var(--accent);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.attempts-label {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.attempts-count {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+/* Card body */
+.concept-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.concept-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.concept-desc {
+  font-size: 16px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Buttons */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px 0;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.btn-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Mastered Button */
+.btn-mastered {
+  background: #f0fdf4;
+  color: var(--success);
+  border: 1px solid #bbf7d0;
+  cursor: default;
+}
+
+/* Continue Learning Button */
+.btn-card-continue {
+  background: #fff;
+  color: var(--accent);
+  border-color: var(--accent-border);
+  text-transform: none;
+  /* Avoid uppercase issue */
+}
+
+.btn-card-continue:hover {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+}
+
+
+/* Max Limit Button */
+.btn-max-limit {
+  background: #fff;
+  color: var(--danger);
+  border-color: #f1f5f9;
+  cursor: not-allowed;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1280px) {
+  .concepts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .concepts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .concept-card {
+    padding: 20px;
+    gap: 16px;
+    min-height: auto;
+  }
+
+  .concept-card-top {
+    gap: 12px;
+  }
+
+  .concept-name {
+    font-size: 16px;
+  }
+
+  .concept-desc {
+    font-size: 14px;
+  }
+
+  .concept-circle-wrapper, .concept-circle-svg {
+    width: 72px;
+    height: 72px;
+  }
+
+  .concept-circle-text {
+    font-size: 16px;
+  }
+
+  .concept-stats-bar {
+    padding: 10px 16px;
+    gap: 12px;
+  }
+
+  .stat-value {
+    font-size: 14px;
+  }
+
+  .stat-label {
+    font-size: 9px;
+  }
+
+  .concept-stat-divider {
+    height: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .concept-card {
+    padding: 16px;
+  }
+
+  .concept-card-top {
+    gap: 10px;
+  }
+
+  .concept-circle-wrapper, .concept-circle-svg {
+    width: 60px;
+    height: 60px;
+  }
+
+  .concept-circle-text {
+    font-size: 14px;
+  }
+
+  .concept-name {
+    font-size: 14px;
+  }
+
+  .concept-stats-bar {
+    padding: 8px 12px;
+    gap: 8px;
+    border-radius: 12px;
+  }
+
+  .stat-value {
+    font-size: 13px;
+  }
+
+  .stat-label {
+    font-size: 8px;
+  }
+
+  .concept-stat-divider {
+    height: 20px;
+  }
+
+  .concept-info-btn {
+    top: 10px;
+    right: 10px;
+  }
+
+  .concept-info-icon {
+    width: 18px;
+    height: 18px;
+  }
+}

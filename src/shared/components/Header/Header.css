@@ -1,0 +1,196 @@
+.global-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 40px;
+  height: var(--header-height);
+  border-bottom: 1px solid var(--border-main);
+  background: var(--bg-white);
+  width: 100%;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.header-left .course-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.graduation-cap {
+  width: 26px;
+  height: 26px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.course-title-text {
+  max-width: 500px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.header-right .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.evaluation-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent-light);
+  padding: 8px 16px;
+  border-radius: 100px;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid var(--accent-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.evaluation-nav-btn:hover {
+  background: var(--accent);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--accent-border);
+}
+
+.report-nav-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.report-nav-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--accent);
+  transition: color 0.2s ease;
+  transform: rotate(180deg);
+}
+
+.report-nav-btn:hover .report-nav-icon {
+  opacity: 0.8;
+}
+
+.header-timer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent-light);
+  padding: 8px 16px;
+  border-radius: 100px;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  border: 1px solid var(--accent-border);
+}
+
+.header-timer.critical {
+  background: #fef2f2;
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.header-timer.blinking-critical {
+  animation: blink-red 1s infinite;
+}
+
+@keyframes blink-red {
+  0%, 50% { background: #fef2f2; color: var(--danger); border: 1px solid var(--danger); }
+  51%, 100% { background: #fee2e2; color: #dc2626; border: 1px solid #dc2626; }
+}
+
+.user-profile-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-left: 16px;
+  border-left: 1px solid var(--border-main);
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.user-role {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  transition: all 0.2s;
+}
+
+.user-avatar:hover {
+  background: var(--accent);
+  color: white;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .global-header { padding: 0 16px; height: var(--header-height-mobile); }
+  .header-left .course-title { font-size: 15px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .user-text { display: none; }
+  .header-actions { gap: 10px !important; }
+  .header-timer {
+    padding: 6px 12px;
+    font-size: 13px;
+    gap: 6px;
+  }
+  .timer-label {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .global-header { padding: 0 10px; }
+  .header-left .course-title { font-size: 12px; max-width: 180px; }
+  .evaluation-nav-btn span { display: none; }
+  .header-timer {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  .timer-icon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+@media (max-width: 330px) {
+  .header-left .course-title { max-width: 130px; }
+}

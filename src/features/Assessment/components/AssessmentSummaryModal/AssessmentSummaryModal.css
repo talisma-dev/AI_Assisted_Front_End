@@ -1,0 +1,253 @@
+.assessment-summary-modal {
+  text-align: center;
+  padding: 32px 40px;
+}
+
+/* Expired Icon Styles (Time Expired only) */
+.expired-icon-wrapper {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-white);
+  border-radius: 50%;
+  border: 4px solid var(--accent-light);
+}
+
+.expired-main-icon {
+  width: 40px;
+  height: 40px;
+  color: var(--accent);
+  position: relative;
+  z-index: 2;
+}
+
+.pulse-circle {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: var(--accent-light);
+  border-radius: 50%;
+  animation: pulse-ring 2s infinite;
+  z-index: 1;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* Header Styles */
+.summary-header {
+  margin-bottom: 24px;
+}
+
+.summary-header h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-h);
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+.summary-header p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Stats Container */
+.stats-container {
+  background: var(--bg-main);
+  border-radius: 12px;
+  padding: 8px;
+  margin-bottom: 20px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--bg-white);
+  border-radius: 8px;
+  margin-bottom: 4px;
+}
+
+.stat-row:last-child {
+  margin-bottom: 0;
+}
+
+.stat-label-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.stat-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.attempted-icon {
+  color: var(--accent);
+}
+
+.unattempted-icon {
+  color: var(--accent);
+}
+
+.flagged-icon {
+  color: var(--warning);
+}
+
+.stat-number {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-h);
+}
+
+.stat-total {
+  font-size: 14px;
+  opacity: 0.5;
+}
+
+/* Warning Banner */
+.warning-banner {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid var(--warning);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  text-align: left;
+}
+
+.warning-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--warning);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.warning-banner p {
+  font-size: 13px;
+  color: var(--text-main);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Actions */
+.summary-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.summary-actions.single-button {
+  justify-content: center;
+}
+
+.btn-review,
+.btn-confirm-submit,
+.view-report-btn {
+  flex: 1;
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn-review {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-review:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.btn-confirm-submit {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-confirm-submit:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.view-report-btn {
+  background: var(--accent);
+  color: white;
+  max-width: 400px;
+  padding: 16px;
+  border-radius: 12px;
+  font-size: 15px;
+  box-shadow: 0 4px 12px var(--accent-border);
+}
+
+.view-report-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px var(--accent-border);
+  filter: brightness(1.1);
+}
+
+/* Mobile Responsive */
+@media (max-width: 640px) {
+  .assessment-summary-modal {
+    padding: 24px 20px;
+  }
+
+  .summary-header h2 {
+    font-size: 18px;
+  }
+
+  .stat-label-row {
+    font-size: 13px;
+  }
+
+  .stat-number {
+    font-size: 16px;
+  }
+
+  .summary-actions {
+    flex-direction: column;
+  }
+
+  .btn-review,
+  .btn-confirm-submit,
+  .view-report-btn {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 400px) {
+  .stat-label-row {
+    font-size: 11px;
+  }
+
+  .stat-number {
+    font-size: 14px;
+  }
+}
