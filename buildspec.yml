@@ -1,0 +1,30 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+    commands:
+      - echo Installing source NPM dependencies...
+      - npm install
+      - echo Dependencies installed
+      - echo listing s3 bucket files
+      - aws s3 ls s3://talisma-assisted-learning --recursive
+  build:
+    commands:
+      - echo Building the application...
+      - npm run build
+      - echo Build completed
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Listing build directory contents...
+      - ls -R dist
+      - echo Syncing build directory to S3 bucket...
+      - aws s3 sync dist/ s3://talisma-assisted-learning --delete
+      - echo Sync completed
+      - echo Listing S3 bucket files after sync...
+      - aws s3 ls s3://talisma-assisted-learning --recursive
+      - echo Invalidation of CloudFront distribution...
+      - aws cloudfront create-invalidation --distribution-id EB0BE9NL1XAN8 --paths "/*"
+      - echo Invalidation request submitted
