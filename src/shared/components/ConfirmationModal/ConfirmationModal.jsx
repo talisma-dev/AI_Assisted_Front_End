@@ -6,7 +6,7 @@ import './ConfirmationModal.css';
 const ConfirmationModal = ({ onConfirm, isOpen, showTimer, duration, masteryThreshold, attempts, overview, assessmentData }) => {
   const [isChecked, setIsChecked] = useState(false);
   const [isBeforeYouBeginExpanded, setIsBeforeYouBeginExpanded] = useState(true);
-  const [isOverviewExpanded, setIsOverviewExpanded] = useState(false);
+  const [isOverviewExpanded, setIsOverviewExpanded] = useState(true);
 
   const handleConfirm = () => {
     if (isChecked && onConfirm) {
@@ -37,7 +37,7 @@ const ConfirmationModal = ({ onConfirm, isOpen, showTimer, duration, masteryThre
                   A score of <strong>{masteryThreshold}% or higher</strong> is required to achieve Mastery.
                 </li>
                 <li className="confirmation-item">
-                  The timer will start once you click <strong>"Agree & Start Assessment"</strong>.Note that any question left blank will be incorrect and marked as unanswered.
+                  The timer will start once you click <strong>"Agree & Start Assessment"</strong>. Note that any question left blank will be incorrect and marked as unanswered.
                 </li>
                 <li className="confirmation-item">
                   The quiz will be <strong>automatically submitted when the timer expires</strong>.
@@ -55,7 +55,7 @@ const ConfirmationModal = ({ onConfirm, isOpen, showTimer, duration, masteryThre
                   A score of <strong>{masteryThreshold}% or higher</strong> is required to achieve Mastery.
                 </li>
                 <li className="confirmation-item">
-                  You will be having <strong>{attempts} Attempts</strong>.
+                  You will have <strong>{attempts} Attempts</strong>.
                 </li>
                 <li className="confirmation-item">
                   If the quiz is not submitted before the session expires, <strong>your answers will be lost.</strong>
