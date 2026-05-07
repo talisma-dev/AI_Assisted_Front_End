@@ -1,22 +1,81 @@
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '');
 
+let tokenExpiryTimeout = null;
+
+const clearTokenbyExpiryTime = (expiryMs) => {
+  // Clear any previously set timeout
+  if (tokenExpiryTimeout) {
+    clearTimeout(tokenExpiryTimeout);
+  }
+  
+  // Calculate delay in milliseconds
+  const delayMs = expiryMs - Date.now();
+  
+  if (delayMs > 0) {
+    tokenExpiryTimeout = setTimeout(() => {
+      removeToken();
+      window.dispatchEvent(new CustomEvent('token-removed'));
+    }, delayMs);
+  }
+};
+
+export const restoreTokenExpiry = () => {
+  const expiryTimeMs = localStorage.getItem('token_expiry');
+  
+  if (expiryTimeMs) {
+    const delayMs = parseInt(expiryTimeMs) - Date.now();
+    
+    if (delayMs > 0) {
+      clearTokenbyExpiryTime(parseInt(expiryTimeMs));
+    } else {
+      // Token already expired, remove it
+      removeToken();
+    }
+  }
+};
+
+
 export const setToken = (token,expiry) => {
-  document.cookie = `jwt_token=${token}; path=/; secure; samesite=None; max-age=${expiry}`;
+  // document.cookie = `jwt_token=${token}; path=/; secure; samesite=None; max-age=${expiry}`;
+  // window.dispatchEvent(new CustomEvent('token-changed', { detail: { token } }));
+  localStorage.setItem('jwt_token', token);
+  
+  // Store expiry time in milliseconds
+  const expiryTimeMs = Date.now() + (expiry * 1000);
+  localStorage.setItem('token_expiry', expiryTimeMs);
+  
+  clearTokenbyExpiryTime(expiryTimeMs);
   window.dispatchEvent(new CustomEvent('token-changed', { detail: { token } }));
 };
 
 export const getToken = () => {
  try {
-  const cookies = document.cookie.split(';');
-  const tokenCookie = cookies.find(c => c.trim().startsWith('jwt_token='));
-  return tokenCookie ? tokenCookie.split('=').slice(1).join('=').trim() : null;
+  // const cookies = document.cookie.split(';');
+  // const tokenCookie = cookies.find(c => c.trim().startsWith('jwt_token='));
+  // return tokenCookie ? tokenCookie.split('=').slice(1).join('=').trim() : null;
+  const expiryTime = localStorage.getItem('token_expiry')
+  if (!expiryTime || (expiryTime && Date.now() > parseInt(expiryTime))) {
+    removeToken();
+    return null;
+  }
+
+  return localStorage.getItem('jwt_token');
+
   } catch {
     return null;
   }
 };
 
 export const removeToken = () => {
-  document.cookie = 'jwt_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  // document.cookie = 'jwt_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  // window.dispatchEvent(new CustomEvent('token-removed'));
+  if (tokenExpiryTimeout) {
+    clearTimeout(tokenExpiryTimeout);
+    tokenExpiryTimeout = null;
+  }
+  
+  localStorage.removeItem('jwt_token');
+  localStorage.removeItem('token_expiry');
   window.dispatchEvent(new CustomEvent('token-removed'));
 };
 
@@ -59,15 +118,18 @@ export const requestStorageAccess = async () => {
 
 
 export const bootstrapAuth = async () => {
-  const hasAccess = await hasStorageAccess();
 
-  if (!hasAccess) {
-    return { status: 'needs-user-action' };
-  }
 
-  if (!isTokenValid()) {
-    return { status: 'invalid-token' };
-  }
+
+  // const hasAccess = await hasStorageAccess();
+
+  // if (!hasAccess) {
+  //   return { status: 'needs-user-action' };
+  // }
+
+  // if (!isTokenValid()) {
+  //   return { status: 'invalid-token' };
+  // }
 
   return { status: 'ready' };
 };
