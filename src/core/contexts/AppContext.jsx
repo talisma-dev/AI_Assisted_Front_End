@@ -28,6 +28,7 @@ const parsePerformanceData = (rawList = [], detailData = []) => {
       }
       attemptsMap.get(detail.conceptName).push({
         attemptCount: detail.attemptCount || 0,
+        score: detail.score || 0,
         answered: detail.answeredQuestionsCount || 0,
         unanswered: detail.unansweredQuestionsCount || 0,
         completionTimeTaken: detail.completionTimeTaken || 0
@@ -40,8 +41,9 @@ const parsePerformanceData = (rawList = [], detailData = []) => {
     const totals = attempts.reduce((sum, a) => ({
       answered: sum.answered + a.answered,
       unanswered: sum.unanswered + a.unanswered,
-      completionTimeTaken: sum.completionTimeTaken + a.completionTimeTaken
-    }), { answered: 0, unanswered: 0, completionTimeTaken: 0 });
+      completionTimeTaken: sum.completionTimeTaken + a.completionTimeTaken,
+      score: sum.score + a.score
+    }), { answered: 0, unanswered: 0, completionTimeTaken: 0, score: 0 });
 
     return {
       id: item.concept,
@@ -53,6 +55,7 @@ const parsePerformanceData = (rawList = [], detailData = []) => {
       answered: totals.answered,
       unanswered: totals.unanswered,
       completionTimeTaken: totals.completionTimeTaken,
+      totalScore: totals.score,
       attemptsDetails: attempts 
     };
   });
