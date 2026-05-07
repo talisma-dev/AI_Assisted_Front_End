@@ -9,7 +9,7 @@
   flex-direction: column;
   gap: 32px;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .evaluation-content {
@@ -53,7 +53,7 @@
 /* ── Summary Cards ── */
 .summary-cards {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 16px;
 }
 
@@ -61,14 +61,15 @@
   background: linear-gradient(145deg, #fff 0%, #f8fafc 100%);
   border-radius: 20px;
   border: 1px solid rgba(226, 232, 240, 0.6);
-  padding: 24px;
+  padding: 20px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 10px 20px -5px rgba(0, 0, 0, 0.04);
   transition: all 0.3s ease;
   position: relative;
   overflow: visible;
+  min-height: 120px;
 }
 
 .summary-card:hover {
@@ -78,12 +79,12 @@
 }
 
 .card-icon-wrapper {
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 16px;
+  border-radius: 12px;
   flex-shrink: 0;
   transition: transform 0.3s;
 }
@@ -93,8 +94,8 @@
 }
 
 .card-icon {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   stroke: #fff;
   stroke-width: 2;
 }
@@ -117,14 +118,14 @@
 }
 
 .card-stat-label {
-  font-size: 18px;
-  font-weight: 800;
+  font-size: 14px;
+  font-weight: 700;
   letter-spacing: 0.02em;
   color: #64748b;
   text-transform: uppercase;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 /* Info icon with tooltip */
@@ -183,14 +184,14 @@
 }
 
 .card-main-stat {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 800;
   color: #1e293b;
   line-height: 1.1;
 }
 
 .card-subtitle {
-  font-size: 13px;
+  font-size: 12px;
   color: #94a3b8;
   font-weight: 500;
 }
@@ -372,23 +373,85 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 1280px) {
+@media (max-width: 1400px) {
   .evaluation-page {
-    padding: 80px 40px 40px;
+    padding: 90px 50px 40px;
   }
+  
+  .summary-cards {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  
+  .page-title {
+    font-size: 52px;
+  }
+}
 
+@media (max-width: 1200px) {
+  .evaluation-page {
+    padding: 85px 45px 40px;
+  }
+  
+  .summary-cards {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  
   .page-title {
     font-size: 48px;
+  }
+  
+  .summary-card {
+    padding: 18px;
+    min-height: 110px;
   }
 }
 
 @media (max-width: 1024px) {
+  .evaluation-page {
+    padding: 80px 40px 40px;
+  }
+
   .summary-cards {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
   }
 
   .page-title {
-    font-size: 40px;
+    font-size: 44px;
+  }
+  
+  .summary-card {
+    padding: 16px;
+    min-height: 100px;
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .card-icon-wrapper {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .card-icon {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .card-main-stat {
+    font-size: 20px;
+  }
+  
+  .card-stat-label {
+    font-size: 12px;
+  }
+  
+  .card-subtitle {
+    font-size: 11px;
   }
 }
 
@@ -397,8 +460,19 @@
     padding: 80px 24px 32px;
   }
 
+  .summary-cards {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+  }
+
   .summary-card {
-    padding: 24px 20px;
+    padding: 16px 14px;
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+    align-items: center;
+    min-height: 140px;
+    justify-content: center;
   }
 
   .page-title {
@@ -408,6 +482,28 @@
   .section-title {
     font-size: 24px;
   }
+  
+  .card-icon-wrapper {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .card-icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .card-main-stat {
+    font-size: 18px;
+  }
+  
+  .card-stat-label {
+    font-size: 11px;
+  }
+  
+  .card-subtitle {
+    font-size: 10px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -416,44 +512,43 @@
   }
 
   .summary-cards {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
 
   .summary-card {
-    padding: 16px 12px;
+    padding: 14px 10px;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     text-align: center;
     align-items: center;
-    min-height: 180px;
+    min-height: 120px;
     justify-content: center;
   }
 
   .card-icon-wrapper {
-    width: 42px;
-    height: 42px;
-    border-radius: 10px;
-    margin-left: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
   }
 
   .card-icon {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
   }
 
   .card-stat-label {
-    font-size: 11px;
+    font-size: 10px;
     text-align: center !important;
   }
 
   .card-main-stat {
-    font-size: 18px;
+    font-size: 16px;
     text-align: center !important;
   }
 
   .card-subtitle {
-    font-size: 10px;
+    font-size: 9px;
     text-align: center !important;
   }
 
@@ -464,7 +559,7 @@
   }
 
   .score-bar-wrap {
-    display: none; /* Hide progress bar in 2-column mobile view to save space */
+    display: none;
   }
 
   .page-title {

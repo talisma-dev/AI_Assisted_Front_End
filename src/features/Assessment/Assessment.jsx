@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, ChevronsRight, ChevronsLeft, Flag, ChevronsLeft as CollapseIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronsRight, ChevronsLeft, Bookmark, ChevronsLeft as CollapseIcon } from 'lucide-react';
 import { getQuestionsData } from '@api/getQuestionsData';
 import { evaluateAssessment } from '@api/evaluateAssessment';
 import { saveAssessmentSession } from '@core/utils/timeTracker';
@@ -177,9 +177,11 @@ export default function Assessment({
       });
 
       const conceptBasedAnswerDetails = {};
+      const conceptCount = Object.keys(conceptStats).length;
+      const timePerConcept = Math.floor(totalActiveTime / conceptCount);
       Object.entries(conceptStats).forEach(([concept, stats]) => {
         conceptBasedAnswerDetails[concept] = {
-          completionTimeTakenSeconds: totalActiveTime,
+          completionTimeTakenSeconds: timePerConcept,
           answeredQuestionsCount: stats.answered,
           unansweredQuestionsCount: stats.total - stats.answered
         };
@@ -351,7 +353,7 @@ export default function Assessment({
             </div>
             <div className="legend">
               <div className="legend-item"><span className="status-dot answered" /> ANSWERED ({answeredCount})</div>
-              <div className="legend-item"><span className="status-dot flagged" /> FOR REVIEW ({flaggedCount})</div>
+              <div className="legend-item"><span className="status-dot flagged" /> MARKED FOR REVIEW ({flaggedCount})</div>
               <div className="legend-item"><span className="status-dot not-visited" /> NOT VISITED ({notVisitedCount})</div>
             </div>
           </div>
@@ -369,8 +371,8 @@ export default function Assessment({
             className={`btn-flag ${flaggedQuestions[currentQuestion.question_id] ? 'flagged' : ''}`}
             onClick={toggleFlag}
           >
-            <Flag className="flag-icon" fill={flaggedQuestions[currentQuestion.question_id] ? "currentColor" : "none"} />
-            {flaggedQuestions[currentQuestion.question_id] ? 'Flagged for Review' : 'Mark for Review'}
+            <Bookmark className="flag-icon" fill={flaggedQuestions[currentQuestion.question_id] ? "currentColor" : "none"} />
+            {flaggedQuestions[currentQuestion.question_id] ? 'Marked for Review' : 'Mark for Review'}
           </button>
         </div>
 

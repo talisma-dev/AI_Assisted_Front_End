@@ -5,6 +5,13 @@ import { BadgeCheck, ArrowRight, Info, X, RotateCcw, Clock, CheckCircle2, Octago
 import { truncateText, TRUNCATION_CONFIG } from '@core/utils/textUtils';
 import './MicroConcepts.css';
 
+const formatTimeDisplay = (seconds) => {
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}m ${remainingSeconds}s`;
+};
+
 const MicroConcepts = ({ attempts, conceptPerformance = [], buttonTexts = {}, onConceptCountChange }) => {
   const navigate = useNavigate();
   const [activePopup, setActivePopup] = useState(null);
@@ -86,10 +93,8 @@ const MicroConcepts = ({ attempts, conceptPerformance = [], buttonTexts = {}, on
     };
   };
 
-  const hasMoreThanFour = concepts.length > 4;
-
   return (
-    <div className={`concepts-grid ${hasMoreThanFour ? '' : 'concepts-grid-no-scroll'}`}>
+    <div className="concepts-grid">
       {concepts.map((concept) => {
         const circleColor = getCircleColor(concept.status);
         const strokeProps = calculateStrokeDasharray(concept.score);
@@ -133,6 +138,7 @@ const MicroConcepts = ({ attempts, conceptPerformance = [], buttonTexts = {}, on
                       <thead>
                         <tr className="popup-header-row">
                           <th className="popup-header-text">Attempts</th>
+                          <th className="popup-header-text">Score</th>
                           <th className="popup-header-text">Time</th>
                           <th className="popup-header-text">Answered</th>
                           <th className="popup-header-text">Unanswered</th>
@@ -142,14 +148,15 @@ const MicroConcepts = ({ attempts, conceptPerformance = [], buttonTexts = {}, on
                         {[...(concept.attemptsDetails || [])].sort((a, b) => b.attemptCount - a.attemptCount).map((attempt, idx) => (
                           <tr key={idx} className="popup-data-row">
                             <td className="popup-attempt-num">{attempt.attemptCount}</td>
-                            <td>{attempt.completionTimeTaken || 0}s</td>
+                            <td>{attempt.score || 0}%</td>
+                            <td>{formatTimeDisplay(attempt.completionTimeTaken || 0)}</td>
                             <td>{attempt.answered || 0}</td>
                             <td>{attempt.unanswered || 0}</td>
                           </tr>
                         ))}
                         {(concept.attemptsDetails || []).length === 0 && (
                           <tr className="popup-data-row">
-                            <td colSpan="4" className="popup-no-data">No attempt details</td>
+                            <td colSpan="5" className="popup-no-data">No attempt details</td>
                           </tr>
                         )}
                       </tbody>
@@ -188,7 +195,7 @@ const MicroConcepts = ({ attempts, conceptPerformance = [], buttonTexts = {}, on
                 </div>
                 <div className="concept-stat-divider"></div>
                 <div className="concept-stat-item">
-                  <span className="stat-value">{(concept.attemptsDetails?.[0]?.completionTimeTaken || 0)}s</span>
+                  <span className="stat-value">{formatTimeDisplay(concept.attemptsDetails?.[0]?.completionTimeTaken || 0)}</span>
                   <span className="stat-label">TIME</span>
                 </div>
                 <div className="concept-stat-divider"></div>

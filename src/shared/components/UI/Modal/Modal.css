@@ -22,7 +22,11 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(0, 0, 0, 0.05);
   animation: modalSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
+}
+
+.modal-inner-content {
+  max-height: 85vh;
+  overflow-y: auto;
 }
 
 @keyframes modalOverlayFade {

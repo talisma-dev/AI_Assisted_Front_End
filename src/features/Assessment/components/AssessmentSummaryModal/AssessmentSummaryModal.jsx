@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, CheckCircle2, XCircle, Flag, AlertCircle } from 'lucide-react';
+import { Clock, CheckCircle2, XCircle, Bookmark, AlertCircle } from 'lucide-react';
 import Modal from '@shared/components/UI/Modal/Modal';
 import './AssessmentSummaryModal.css';
 
@@ -79,7 +79,7 @@ const AssessmentSummaryModal = ({
 
           <div className="stat-row">
             <div className="stat-label-row">
-              <Flag className="stat-icon flagged-icon" fill="currentColor" />
+              <Bookmark className="stat-icon flagged-icon" fill="currentColor" />
               <span>Marked for Review</span>
             </div>
             <span className="stat-number">{markedForReviewCount}</span>
